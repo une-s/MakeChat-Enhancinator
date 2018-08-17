@@ -4,6 +4,13 @@
 
 A userscript to make Zobe.com better, as the website's development has been discontinued.
 
+# How to Get
+
+## For FireFox Users
+
+1. Get the [Greasemonkey add-on](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/)
+2. [Download MakeChat Enhancinator](https://raw.github.com/une-s/MakeChat-Enhancinator/master/makechat-enhancinator.user.js) (direct download link).
+
 # Features
 
 - The :feelsbadman: command now correctly displays the :sadfrog: emoticon.
