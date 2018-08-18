@@ -2,6 +2,8 @@
 
 A userscript to make Zobe.com better, as the website's development has been discontinued.
 
+The script has so far been tested in FireFox and Chrome.
+
 # How to Get
 
 1. Get the [Tampermonkey add-on](https://tampermonkey.net/)
