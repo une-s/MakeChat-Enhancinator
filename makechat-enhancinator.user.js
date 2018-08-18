@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         MakeChat Enhancinator
 // @namespace    https://unern.com/
-// @version      1.0.2018.08
+// @version      1.1.2018.08
 // @description  Enhancement script for Zobe and potentially TeenChat in the future.
 // @downloadURL  https://raw.github.com/une-s/MakeChat-Enhancinator/master/makechat-enhancinator.user.js
 // @author       Une S
+// @require      http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js
 // @match        http://zobe.com/*
 // @match        https://zobe.com/*
 // @match        http://www.zobe.com/*
@@ -15,21 +16,38 @@
 
 (function() {
   'use strict';
+
+  // Stop the default page from loading
+  window.stop();
   
-  // Replace default script
-  window.addEventListener('beforescriptexecute', function replaceScript(e) {
-    var target = e.target;
-    var src = target.src;
-    if(src && src.indexOf('.com/javascripts/all.') >= 0) {
-      e.preventDefault();
-      e.stopPropagation();
-      document.head.removeChild(target);
-      document.head.appendChild(createReplacement(enhancinate));
-      window.removeEventListener(e.type, replaceScript, true);
+  // Re-fetch page without loading it
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', window.location.href);
+  xhr.responseType = "document";
+  xhr.onload = function() {
+    var res = this.response;
+    
+    // Remove default script from page, preventing it from running
+    var children = res.head.children;
+    for(var i = children.length - 1; i >= 0; i--) {
+      var child = children[i];
+      if(child.tagName == "SCRIPT" && child.src.search('/javascripts/all.') >= 0) {
+        res.head.removeChild(child);
+        break;
+      }
     }
-  }, true);
-  // Create replacement script
-  function createReplacement(func) {
+    
+    // Load edited page
+    document.open();
+    document.write('<!DOCTYPE html>' + res.documentElement.outerHTML);
+    document.close();
+    
+    // Add custom script to loaded page
+    document.head.appendChild(createScriptTag(enhancinate));
+  };
+  xhr.send();
+
+  function createScriptTag(func) {
     var script = document.createElement('script');
     var str = func.toString();
     str = str.substring(str.indexOf('{')+1,str.lastIndexOf('}'));
@@ -38,10 +56,14 @@
   }
 })();
 
-
 // - The replacement script -
 function enhancinate() {
-  
+
+  var debug = {
+    out: false,
+    in: false
+  };
+
   // Additional styling
   (function() {
     // Define style object
@@ -54,7 +76,7 @@ function enhancinate() {
         'padding-right': '8px'
       }
     };
-    
+
     // Convert to string
     var str = '';
     for(var select of Object.getOwnPropertyNames(style)) {
@@ -64,16 +86,16 @@ function enhancinate() {
         str += prop + ':' + content[prop] + ';';
       str += '}';
     }
-    
+
     // Create style element
     var el = document.createElement('style');
     el.innerHTML = str;
     document.head.appendChild(el);
   })(); //End styles
-  
+
   // Edit markup
   jQuery(function() {
-    
+
     // Create settings markup
     createSettings({
       'Text Settings': {
@@ -93,12 +115,12 @@ function enhancinate() {
     });
     function createSettings(settings) {
       var el = document.getElementById('settings'), label, elem, elem2;
-      
+
       // Clear default
       while(el.firstChild) {
         el.removeChild(el.firstChild);
       }
-      
+
       // Add replacement
       for(var catTitle of Object.getOwnPropertyNames(settings)) {
        	var h2 = document.createElement('h2');
@@ -129,14 +151,14 @@ function enhancinate() {
       el.appendChild(elem);
     }
   });
-  
+
   // Edit Help
   function editHelp($el) {
-       
+
     var updated = 'August 11, 2018';
-    
+
     $el.children('.updated').text('Updated '+updated);
-    
+
     // Variables
     var $article = $el.children('article'),
         $basic = $article.first(),
@@ -144,12 +166,12 @@ function enhancinate() {
         ul = document.createElement('ul'),
         regex = /replace\(\/([^/]+)\/g,function\(.,.\){return .\.emotifyPng\(([^)]+)\)}/g,
         map = {};
-    
+
     // Basic Emoticons
     $basic.children('h4').text('Basic Emoticons');
     $basic.children('ul').last().children('li').last()
       .html("<img src='/images/emotes/angel.gif' /> O:)");
-    
+
     // Meme Emoticons
     $meme.html('<h4>Meme Emoticons</h4>');
     ul.className = 'emotes memes';
@@ -167,21 +189,21 @@ function enhancinate() {
     });
     $meme.append($(ul));
     $basic.after($meme);
-    
+
     return $el;
   }
-  
+
   function correctMessage(msg) {
     return msg.replace('You can use this boost again in 6 hours', function(match) {
       return match.replace('6','4');
     })
   }
-  
-  
+
+
   // The original minified script with edits
-  
-  /*  SWFObject v2.2 <http://code.google.com/p/swfobject/> 
-    iss released under the MIT License <http://www.opensource.org/licenses/mit-license.php> 
+
+  /*  SWFObject v2.2 <http://code.google.com/p/swfobject/>
+    iss released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
   */
   var swfobject=function(){
     function C(){if(b)return;try{var e=a.getElementsByTagName("body")[0].appendChild(U("span"));e.parentNode.removeChild(e)}catch(t){return}b=!0;var n=c.length;for(var r=0;r<n;r++)c[r]()}function k(e){b?e():c[c.length]=e}function L(t){if(typeof u.addEventListener!=e)u.addEventListener("load",t,!1);else if(typeof a.addEventListener!=e)a.addEventListener("load",t,!1);else if(typeof u.attachEvent!=e)z(u,"onload",t);else if(typeof u.onload=="function"){var n=u.onload;u.onload=function(){n(),t()}}else u.onload=t}function A(){l?O():M()}function O(){var n=a.getElementsByTagName("body")[0],r=U(t);r.setAttribute("type",i);var s=n.appendChild(r);if(s){var o=0;(function(){if(typeof s.GetVariable!=e){var t=s.GetVariable("$version");t&&(t=t.split(" ")[1].split(","),T.pv=[parseInt(t[0],10),parseInt(t[1],10),parseInt(t[2],10)])}else if(o<10){o++,setTimeout(arguments.callee,10);return}n.removeChild(r),s=null,M()})()}else M()}function M(){var t=h.length;if(t>0)for(var n=0;n<t;n++){var r=h[n].id,i=h[n].callbackFn,s={success:!1,id:r};if(T.pv[0]>0){var o=R(r);if(o)if(W(h[n].swfVersion)&&!(T.wk&&T.wk<312))V(r,!0),i&&(s.success=!0,s.ref=_(r),i(s));else if(h[n].expressInstall&&D()){var u={};u.data=h[n].expressInstall,u.width=o.getAttribute("width")||"0",u.height=o.getAttribute("height")||"0",o.getAttribute("class")&&(u.styleclass=o.getAttribute("class")),o.getAttribute("align")&&(u.align=o.getAttribute("align"));var a={},f=o.getElementsByTagName("param"),l=f.length;for(var c=0;c<l;c++)f[c].getAttribute("name").toLowerCase()!="movie"&&(a[f[c].getAttribute("name")]=f[c].getAttribute("value"));P(u,a,r,i)}else H(o),i&&i(s)}else{V(r,!0);if(i){var p=_(r);p&&typeof p.SetVariable!=e&&(s.success=!0,s.ref=p),i(s)}}}}function _(n){var r=null,i=R(n);if(i&&i.nodeName=="OBJECT")if(typeof i.SetVariable!=e)r=i;else{var s=i.getElementsByTagName(t)[0];s&&(r=s)}return r}function D(){return!w&&W("6.0.65")&&(T.win||T.mac)&&!(T.wk&&T.wk<312)}function P(t,n,r,i){w=!0,g=i||null,y={success:!1,id:r};var o=R(r);if(o){o.nodeName=="OBJECT"?(v=B(o),m=null):(v=o,m=r),t.id=s;if(typeof t.width==e||!/%$/.test(t.width)&&parseInt(t.width,10)<310)t.width="310";if(typeof t.height==e||!/%$/.test(t.height)&&parseInt(t.height,10)<137)t.height="137";a.title=a.title.slice(0,47)+" - Flash Player Installation";var f=T.ie&&T.win?"ActiveX":"PlugIn",l="MMredirectURL="+u.location.toString().replace(/&/g,"%26")+"&MMplayerType="+f+"&MMdoctitle="+a.title;typeof n.flashvars!=e?n.flashvars+="&"+l:n.flashvars=l;if(T.ie&&T.win&&o.readyState!=4){var c=U("div");r+="SWFObjectNew",c.setAttribute("id",r),o.parentNode.insertBefore(c,o),o.style.display="none",function(){o.readyState==4?o.parentNode.removeChild(o):setTimeout(arguments.callee,10)}()}j(t,n,r)}}function H(e){if(T.ie&&T.win&&e.readyState!=4){var t=U("div");e.parentNode.insertBefore(t,e),t.parentNode.replaceChild(B(e),t),e.style.display="none",function(){e.readyState==4?e.parentNode.removeChild(e):setTimeout(arguments.callee,10)}()}else e.parentNode.replaceChild(B(e),e)}function B(e){var n=U("div");if(T.win&&T.ie)n.innerHTML=e.innerHTML;else{var r=e.getElementsByTagName(t)[0];if(r){var i=r.childNodes;if(i){var s=i.length;for(var o=0;o<s;o++)(i[o].nodeType!=1||i[o].nodeName!="PARAM")&&i[o].nodeType!=8&&n.appendChild(i[o].cloneNode(!0))}}}return n}function j(n,r,s){var o,u=R(s);if(T.wk&&T.wk<312)return o;if(u){typeof n.id==e&&(n.id=s);if(T.ie&&T.win){var a="";for(var f in n)n[f]!=Object.prototype[f]&&(f.toLowerCase()=="data"?r.movie=n[f]:f.toLowerCase()=="styleclass"?a+=' class="'+n[f]+'"':f.toLowerCase()!="classid"&&(a+=" "+f+'="'+n[f]+'"'));var l="";for(var c in r)r[c]!=Object.prototype[c]&&(l+='<param name="'+c+'" value="'+r[c]+'" />');u.outerHTML='<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"'+a+">"+l+"</object>",p[p.length]=n.id,o=R(n.id)}else{var h=U(t);h.setAttribute("type",i);for(var d in n)n[d]!=Object.prototype[d]&&(d.toLowerCase()=="styleclass"?h.setAttribute("class",n[d]):d.toLowerCase()!="classid"&&h.setAttribute(d,n[d]));for(var v in r)r[v]!=Object.prototype[v]&&v.toLowerCase()!="movie"&&F(h,v,r[v]);u.parentNode.replaceChild(h,u),o=h}}return o}function F(e,t,n){var r=U("param");r.setAttribute("name",t),r.setAttribute("value",n),e.appendChild(r)}function I(e){var t=R(e);t&&t.nodeName=="OBJECT"&&(T.ie&&T.win?(t.style.display="none",function(){t.readyState==4?q(e):setTimeout(arguments.callee,10)}()):t.parentNode.removeChild(t))}function q(e){var t=R(e);if(t){for(var n in t)typeof t[n]=="function"&&(t[n]=null);t.parentNode.removeChild(t)}}function R(e){var t=null;try{t=a.getElementById(e)}catch(n){}return t}function U(e){return a.createElement(e)}function z(e,t,n){e.attachEvent(t,n),d[d.length]=[e,t,n]}function W(e){var t=T.pv,n=e.split(".");return n[0]=parseInt(n[0],10),n[1]=parseInt(n[1],10)||0,n[2]=parseInt(n[2],10)||0,t[0]>n[0]||t[0]==n[0]&&t[1]>n[1]||t[0]==n[0]&&t[1]==n[1]&&t[2]>=n[2]?!0:!1}function X(n,r,i,s){if(T.ie&&T.mac)return;var o=a.getElementsByTagName("head")[0];if(!o)return;var u=i&&typeof i=="string"?i:"screen";s&&(E=null,S=null);if(!E||S!=u){var f=U("style");f.setAttribute("type","text/css"),f.setAttribute("media",u),E=o.appendChild(f),T.ie&&T.win&&typeof a.styleSheets!=e&&a.styleSheets.length>0&&(E=a.styleSheets[a.styleSheets.length-1]),S=u}T.ie&&T.win?E&&typeof E.addRule==t&&E.addRule(n,r):E&&typeof a.createTextNode!=e&&E.appendChild(a.createTextNode(n+" {"+r+"}"))}function V(e,t){if(!x)return;var n=t?"visible":"hidden";b&&R(e)?R(e).style.visibility=n:X("#"+e,"visibility:"+n)}function $(t){var n=/[\\\"<>\.;]/,r=n.exec(t)!=null;return r&&typeof encodeURIComponent!=e?encodeURIComponent(t):t}var e="undefined",t="object",n="Shockwave Flash",r="ShockwaveFlash.ShockwaveFlash",i="application/x-shockwave-flash",s="SWFObjectExprInst",o="onreadystatechange",u=window,a=document,f=navigator,l=!1,c=[A],h=[],p=[],d=[],v,m,g,y,b=!1,w=!1,E,S,x=!0,T=function(){var s=typeof a.getElementById!=e&&typeof a.getElementsByTagName!=e&&typeof a.createElement!=e,o=f.userAgent.toLowerCase(),c=f.platform.toLowerCase(),h=c?/win/.test(c):/win/.test(o),p=c?/mac/.test(c):/mac/.test(o),d=/webkit/.test(o)?parseFloat(o.replace(/^.*webkit\/(\d+(\.\d+)?).*$/,"$1")):!1,v=!1,m=[0,0,0],g=null;if(typeof f.plugins!=e&&typeof f.plugins[n]==t)g=f.plugins[n].description,g&&(typeof f.mimeTypes==e||!f.mimeTypes[i]||!!f.mimeTypes[i].enabledPlugin)&&(l=!0,v=!1,g=g.replace(/^.*\s+(\S+\s+\S+$)/,"$1"),m[0]=parseInt(g.replace(/^(.*)\..*$/,"$1"),10),m[1]=parseInt(g.replace(/^.*\.(.*)\s.*$/,"$1"),10),m[2]=/[a-zA-Z]/.test(g)?parseInt(g.replace(/^.*[a-zA-Z]+(.*)$/,"$1"),10):0);else if(typeof u.ActiveXObject!=e)try{var y=new ActiveXObject(r);y&&(g=y.GetVariable("$version"),g&&(v=!0,g=g.split(" ")[1].split(","),m=[parseInt(g[0],10),parseInt(g[1],10),parseInt(g[2],10)]))}catch(b){}return{w3:s,pv:m,wk:d,ie:v,win:h,mac:p}}(),N=function(){if(!T.w3)return;(typeof a.readyState!=e&&a.readyState=="complete"||typeof a.readyState==e&&(a.getElementsByTagName("body")[0]||a.body))&&C(),b||(typeof a.addEventListener!=e&&a.addEventListener("DOMContentLoaded",C,!1),T.ie&&T.win&&(a.attachEvent(o,function(){a.readyState=="complete"&&(a.detachEvent(o,arguments.callee),C())}),u==top&&function(){if(b)return;try{a.documentElement.doScroll("left")}catch(e){setTimeout(arguments.callee,0);return}C()}()),T.wk&&function(){if(b)return;if(!/loaded|complete/.test(a.readyState)){setTimeout(arguments.callee,0);return}C()}(),L(C))}(),J=function(){T.ie&&T.win&&window.attachEvent("onunload",function(){var e=d.length;for(var t=0;t<e;t++)d[t][0].detachEvent(d[t][1],d[t][2]);var n=p.length;for(var r=0;r<n;r++)I(p[r]);for(var i in T)T[i]=null;T=null;for(var s in swfobject)swfobject[s]=null;swfobject=null})}();return{registerObject:function(e,t,n,r){if(T.w3&&e&&t){var i={};i.id=e,i.swfVersion=t,i.expressInstall=n,i.callbackFn=r,h[h.length]=i,V(e,!1)}else r&&r({success:!1,id:e})},getObjectById:function(e){if(T.w3)return _(e)},embedSWF:function(n,r,i,s,o,u,a,f,l,c){var h={success:!1,id:r};T.w3&&!(T.wk&&T.wk<312)&&n&&r&&i&&s&&o?(V(r,!1),k(function(){i+="",s+="";var p={};if(l&&typeof l===t)for(var d in l)p[d]=l[d];p.data=n,p.width=i,p.height=s;var v={};if(f&&typeof f===t)for(var m in f)v[m]=f[m];if(a&&typeof a===t)for(var g in a)typeof v.flashvars!=e?v.flashvars+="&"+g+"="+a[g]:v.flashvars=g+"="+a[g];if(W(o)){var y=j(p,v,r);p.id==r&&V(r,!0),h.success=!0,h.ref=y}else{if(u&&D()){p.data=u,P(p,v,r,c);return}V(r,!0)}c&&c(h)})):c&&c(h)},switchOffAutoHideShow:function(){x=!1},ua:T,getFlashPlayerVersion:function(){return{major:T.pv[0],minor:T.pv[1],release:T.pv[2]}},hasFlashPlayerVersion:W,createSWF:function(e,t,n){return T.w3?j(e,t,n):undefined},showExpressInstall:function(e,t,n,r){T.w3&&D()&&P(e,t,n,r)},removeSWF:function(e){T.w3&&I(e)},createCSS:function(e,t,n,r){T.w3&&X(e,t,n,r)},addDomLoadEvent:k,addLoadEvent:L,getQueryParamValue:function(e){var t=a.location.search||a.location.hash;if(t){/\?/.test(t)&&(t=t.split("?")[1]);if(e==null)return $(t);var n=t.split("&");for(var r=0;r<n.length;r++)if(n[r].substring(0,n[r].indexOf("="))==e)return $(n[r].substring(n[r].indexOf("=")+1))}return""},expressInstallCallback:function(){if(w){var e=R(s);e&&v&&(e.parentNode.replaceChild(v,e),m&&(V(m,!0),T.ie&&T.win&&(v.style.display="block")),g&&g(y)),w=!1}}}
@@ -791,7 +813,7 @@ function enhancinate() {
       function t(){return this.retryXMLConnection=r(this.retryXMLConnection,this),t.__super__.constructor.apply(this,arguments)}
       return s(t,e),
         t.prototype.connect=function(){switch(MakeChat.socketType){case"websockets":return this.connectWebSockets();case"flashsockets":return this.connectFlashSockets()}},
-        t.prototype.connectWebSockets=function(){var e,t,r=this,i;n("establishing websockets connection.."),e=this.get("host"),t=MakeChat.settings.portWebSocket,this.socket=new WebSocket("ws://"+e+":"+t+"/ws"),this.socket.onopen=function(e){return n("connected via websockets"),r.onConnect(e)},this.socket.onclose=function(e){return n("websockets closed"),r.onClose(e)},this.socket.onmessage=function(e){return r.onMessage(e.data)},i=this.socket.send,this.socket.send=function(e){console.log('out -> '+e);i.apply(r.socket,arguments);}}, //Temp: Added var i & 2 commands
+        t.prototype.connectWebSockets=function(){var e,t,r=this,i;n("establishing websockets connection.."),e=this.get("host"),t=MakeChat.settings.portWebSocket,this.socket=new WebSocket("ws://"+e+":"+t+"/ws"),this.socket.onopen=function(e){return n("connected via websockets"),r.onConnect(e)},this.socket.onclose=function(e){return n("websockets closed"),r.onClose(e)},this.socket.onmessage=function(e){return r.onMessage(e.data)},i=this.socket.send,this.socket.send=function(e){debug.out&&console.log('out -> '+e);i.apply(r.socket,arguments);}}, //Debug: Added var i & 2 commands
         t.prototype.connectFlashSockets=function(){var e,t,r,i,s=this;n("establishing flashsockets connection.."),e=this.get("host"),t=MakeChat.settings.portFlashSocket,i='<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0" width="1" height="1" id="swfsocket">\n<param name="allowScriptAccess" value="always" />\n<param name="movie" value="'+MakeChat.settings.socketSwfUrl+'" />\n<param name="quality" value="high" />\n<param name="bgcolor" value="#ffcc00" />\n<embed src="'+MakeChat.settings.socketSwfUrl+'" quality="high" bgcolor="#ffcc00" width="1" height="1" name="swfsocket" align="middle" allowScriptAccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" />\n</object>',r=document.getElementById("swfContainer"),r.innerHTML=i,MakeChat.gateway.init=function(e){return n("JavaScript to Flash connected")},MakeChat.gateway.connect=function(e){return n("connected via swfsockets"),s.onConnect(e)},MakeChat.gateway.message=function(e){return s.onMessage(e)},MakeChat.gateway.error=function(e){return n("error flashsocket")},MakeChat.gateway.close=function(e){return n("close flashsocket",e)},this.retryXMLConnection()},
         t.prototype.retryXMLConnection=function(){var e,t;e=this.get("host"),t=document.getElementById("swfsocket");if(t==null){n("xmlsocket retrying"),after(1e3,this.retryXMLConnection);if(!(this.retries++<50))return}return this.socket=t,this.socket.connect({init:"MakeChat.gateway.init",connect:"MakeChat.gateway.connect",message:"MakeChat.gateway.message",error:"MakeChat.gateway.error",close:"MakeChat.gateway.close",port:MakeChat.settings.portFlashSocket,host:this.get("host")})},
         t.prototype.onClose=function(){this.trigger("close")},
@@ -803,7 +825,7 @@ function enhancinate() {
         t.prototype.eventQueue=[],
         t.prototype.timeoutId=null,
         t.prototype.publish=function(e,t){
-          console.log('in -> '+e+': '+JSON.stringify(t));
+          debug.in&&console.log('in -> '+e+': '+JSON.stringify(t)); //Debug
           return this.trigger(e,t)
         },
         t.prototype.releaseBufferedEvents=function(){var e=this;return this.bufferSocketEvents=!1,_.each(this.bufferedCommands,function(t,n){return e.publish(t.command,t.json)}),this.bufferedCommands=[]},
