@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MakeChat Enhancinator
 // @namespace    https://unern.com/
-// @version      1.1.2018.08
+// @version      1.2.2018.08
 // @description  Enhancement script for Zobe and potentially TeenChat in the future.
 // @downloadURL  https://raw.github.com/une-s/MakeChat-Enhancinator/master/makechat-enhancinator.user.js
 // @author       Une S
@@ -17,35 +17,50 @@
 (function() {
   'use strict';
 
-  // Stop the default page from loading
-  window.stop();
-  
-  // Re-fetch page without loading it
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', window.location.href);
-  xhr.responseType = "document";
-  xhr.onload = function() {
-    var res = this.response;
-    
-    // Remove default script from page, preventing it from running
-    var children = res.head.children;
-    for(var i = children.length - 1; i >= 0; i--) {
-      var child = children[i];
-      if(child.tagName == "SCRIPT" && child.src.search('/javascripts/all.') >= 0) {
-        res.head.removeChild(child);
-        break;
+  if(jQuery.browser.mozilla) {
+    // Replace default script
+    window.addEventListener('beforescriptexecute', function replaceScript(e) {
+      var target = e.target;
+      var src = target.src;
+      if(src && src.indexOf('.com/javascripts/all.') >= 0) {
+        e.preventDefault();
+        e.stopPropagation();
+        document.head.removeChild(target);
+        document.head.appendChild(createScriptTag(enhancinate));
+        window.removeEventListener(e.type, replaceScript, true);
       }
-    }
-    
-    // Load edited page
-    document.open();
-    document.write('<!DOCTYPE html>' + res.documentElement.outerHTML);
-    document.close();
-    
-    // Add custom script to loaded page
-    document.head.appendChild(createScriptTag(enhancinate));
-  };
-  xhr.send();
+    }, true);
+  } else {
+    // Stop the default page from loading
+    window.stop();
+
+    // Re-fetch page without loading it
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', window.location.href);
+    xhr.responseType = "document";
+    xhr.onload = function() {
+      var res = this.response;
+
+      // Remove default script from page, preventing it from running
+      var children = res.head.children;
+      for(var i = children.length - 1; i >= 0; i--) {
+        var child = children[i];
+        if(child.tagName == "SCRIPT" && child.src.search('/javascripts/all.') >= 0) {
+          res.head.removeChild(child);
+          break;
+        }
+      }
+
+      // Load edited page
+      document.open();
+      document.write('<!DOCTYPE html>' + res.documentElement.outerHTML);
+      document.close();
+
+      // Add custom script to loaded page
+      document.head.appendChild(createScriptTag(enhancinate));
+    };
+    xhr.send();
+  }
 
   function createScriptTag(func) {
     var script = document.createElement('script');
