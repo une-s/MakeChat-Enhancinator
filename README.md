@@ -17,3 +17,4 @@ The script has so far been tested in FireFox and Chrome.
 - Added setting: "Hide enter/leave messages"
 - Added setting: "Hide name change messages"
 - Corrected the message on karma boost completion: Next available in 4 hours, not 6 hours
+- Added sound notification setting: "Someone sends a private msg"

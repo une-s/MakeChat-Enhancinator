@@ -1,3 +1,6 @@
+1.3.2018.08
+- Added sound notification setting for private messages
+
 1.2.2018.08
 - Fixed version 1.1.2018.08 breaking in FireFox
 

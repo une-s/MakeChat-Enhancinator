@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MakeChat Enhancinator
 // @namespace    https://unern.com/
-// @version      1.2.2018.08
+// @version      1.3.2018.08
 // @description  Enhancement script for Zobe and potentially TeenChat in the future.
 // @downloadURL  https://raw.github.com/une-s/MakeChat-Enhancinator/master/makechat-enhancinator.user.js
 // @author       Une S
@@ -74,7 +74,7 @@
 // - The replacement script -
 function enhancinate() {
 
-  var debug = {
+  var _debug = {
     out: false,
     in: false
   };
@@ -122,6 +122,7 @@ function enhancinate() {
         'sfx mention': 'When my name is mentioned',
         'sfx enter': 'Someone enters/leaves',
         'sfx message': 'Someone enters a message',
+        'sfx private': 'Someone sends a private msg',
         'sfx all': 'Mute all sounds'
       },
       'Misc Settings': {
@@ -749,6 +750,7 @@ function enhancinate() {
             mentioned:!0,
             enterleave:!1,
             message:!1,
+            private:!1, //F
             muteall:!1
           },
           timeout:4e4,
@@ -828,7 +830,7 @@ function enhancinate() {
       function t(){return this.retryXMLConnection=r(this.retryXMLConnection,this),t.__super__.constructor.apply(this,arguments)}
       return s(t,e),
         t.prototype.connect=function(){switch(MakeChat.socketType){case"websockets":return this.connectWebSockets();case"flashsockets":return this.connectFlashSockets()}},
-        t.prototype.connectWebSockets=function(){var e,t,r=this,i;n("establishing websockets connection.."),e=this.get("host"),t=MakeChat.settings.portWebSocket,this.socket=new WebSocket("ws://"+e+":"+t+"/ws"),this.socket.onopen=function(e){return n("connected via websockets"),r.onConnect(e)},this.socket.onclose=function(e){return n("websockets closed"),r.onClose(e)},this.socket.onmessage=function(e){return r.onMessage(e.data)},i=this.socket.send,this.socket.send=function(e){debug.out&&console.log('out -> '+e);i.apply(r.socket,arguments);}}, //Debug: Added var i & 2 commands
+        t.prototype.connectWebSockets=function(){var e,t,r=this,i;n("establishing websockets connection.."),e=this.get("host"),t=MakeChat.settings.portWebSocket,this.socket=new WebSocket("ws://"+e+":"+t+"/ws"),this.socket.onopen=function(e){return n("connected via websockets"),r.onConnect(e)},this.socket.onclose=function(e){return n("websockets closed"),r.onClose(e)},this.socket.onmessage=function(e){return r.onMessage(e.data)},i=this.socket.send,this.socket.send=function(e){_debug.out&&console.log('out -> '+e);i.apply(r.socket,arguments);}}, //Debug: Added var i & 2 commands
         t.prototype.connectFlashSockets=function(){var e,t,r,i,s=this;n("establishing flashsockets connection.."),e=this.get("host"),t=MakeChat.settings.portFlashSocket,i='<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0" width="1" height="1" id="swfsocket">\n<param name="allowScriptAccess" value="always" />\n<param name="movie" value="'+MakeChat.settings.socketSwfUrl+'" />\n<param name="quality" value="high" />\n<param name="bgcolor" value="#ffcc00" />\n<embed src="'+MakeChat.settings.socketSwfUrl+'" quality="high" bgcolor="#ffcc00" width="1" height="1" name="swfsocket" align="middle" allowScriptAccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" />\n</object>',r=document.getElementById("swfContainer"),r.innerHTML=i,MakeChat.gateway.init=function(e){return n("JavaScript to Flash connected")},MakeChat.gateway.connect=function(e){return n("connected via swfsockets"),s.onConnect(e)},MakeChat.gateway.message=function(e){return s.onMessage(e)},MakeChat.gateway.error=function(e){return n("error flashsocket")},MakeChat.gateway.close=function(e){return n("close flashsocket",e)},this.retryXMLConnection()},
         t.prototype.retryXMLConnection=function(){var e,t;e=this.get("host"),t=document.getElementById("swfsocket");if(t==null){n("xmlsocket retrying"),after(1e3,this.retryXMLConnection);if(!(this.retries++<50))return}return this.socket=t,this.socket.connect({init:"MakeChat.gateway.init",connect:"MakeChat.gateway.connect",message:"MakeChat.gateway.message",error:"MakeChat.gateway.error",close:"MakeChat.gateway.close",port:MakeChat.settings.portFlashSocket,host:this.get("host")})},
         t.prototype.onClose=function(){this.trigger("close")},
@@ -840,7 +842,7 @@ function enhancinate() {
         t.prototype.eventQueue=[],
         t.prototype.timeoutId=null,
         t.prototype.publish=function(e,t){
-          debug.in&&console.log('in -> '+e+': '+JSON.stringify(t)); //Debug
+          _debug.in&&console.log('in -> '+e+': '+JSON.stringify(t)); //Debug
           return this.trigger(e,t)
         },
         t.prototype.releaseBufferedEvents=function(){var e=this;return this.bufferSocketEvents=!1,_.each(this.bufferedCommands,function(t,n){return e.publish(t.command,t.json)}),this.bufferedCommands=[]},
@@ -868,9 +870,114 @@ function enhancinate() {
     t.Core=function(u){
       function f(){return this.youtubeResponse=o(this.youtubeResponse,this),this.whisperUpdate=o(this.whisperUpdate,this),this.unignoreUserResponse=o(this.unignoreUserResponse,this),this.timedOut=o(this.timedOut,this),this.tokenUpdate=o(this.tokenUpdate,this),this.tokenGrabSubmit=o(this.tokenGrabSubmit,this),this.tokenGrab=o(this.tokenGrab,this),this.systemPost=o(this.systemPost,this),this.setUserIdResponse=o(this.setUserIdResponse,this),this.setThemeResponse=o(this.setThemeResponse,this),this.setPMThreshold=o(this.setPMThreshold,this),this.setMaxChars=o(this.setMaxChars,this),this.setCookies=o(this.setCookies,this),this.selectRoomByUrl=o(this.selectRoomByUrl,this),this.selectRoom=o(this.selectRoom,this),this.roomUpdate=o(this.roomUpdate,this),this.roomChange=o(this.roomChange,this),this.roomBackLog=o(this.roomBackLog,this),this.requestUnignoreUser=o(this.requestUnignoreUser,this),this.requestTypingMessage=o(this.requestTypingMessage,this),this.requestSetAge=o(this.requestSetAge,this),this.requestSetGender=o(this.requestSetGender,this),this.requestRoomUpdate=o(this.requestRoomUpdate,this),this.requestPrivateChatMessage=o(this.requestPrivateChatMessage,this),this.requestPrivateChat=o(this.requestPrivateChat,this),this.requestPostMessage=o(this.requestPostMessage,this),this.requestNewRoom=o(this.requestNewRoom,this),this.requestModal=o(this.requestModal,this),this.requestLeaveRoom=o(this.requestLeaveRoom,this),this.requestLeavePrivateChat=o(this.requestLeavePrivateChat,this),this.requestKickUser=o(this.requestKickUser,this),this.requestJoinRoom=o(this.requestJoinRoom,this),this.requestIgnoreUser=o(this.requestIgnoreUser,this),this.requestEditRoom=o(this.requestEditRoom,this),this.requestAssignModUser=o(this.requestAssignModUser,this),this.removeUser=o(this.removeUser,this),this.privateTypingStopResponse=o(this.privateTypingStopResponse,this),this.privateTypingResponse=o(this.privateTypingResponse,this),this.privateMessageResponse=o(this.privateMessageResponse,this),this.privateLogOn=o(this.privateLogOn,this),this.privateLogOff=o(this.privateLogOff,this),this.postMessage=o(this.postMessage,this),this.pong=o(this.pong,this),this.pingUrlRemove=o(this.pingUrlRemove,this),this.pingUrl=o(this.pingUrl,this),this.openPrivateTab=o(this.openPrivateTab,this),this.nameUpdate=o(this.nameUpdate,this),this.modStatus=o(this.modStatus,this),this.maxChars=o(this.maxChars,this),this.karmaButtonHighlight=o(this.karmaButtonHighlight,this),this.karmaRaffle=o(this.karmaRaffle,this),this.karmaUpdate=o(this.karmaUpdate,this),this.karmaBoost=o(this.karmaBoost,this),this.joinRoomResponse=o(this.joinRoomResponse,this),this.inviteUserResponse=o(this.inviteUserResponse,this),this.ignoreUserResponse=o(this.ignoreUserResponse,this),this.idleUser=o(this.idleUser,this),this.growlMessage=o(this.growlMessage,this),this.growlExpire=o(this.growlExpire,this),this.growlClosed=o(this.growlClosed,this),this.gaEvent=o(this.gaEvent,this),this.facebookLogin=o(this.facebookLogin,this),this.exitUrl=o(this.exitUrl,this),this.declareMessage=o(this.declareMessage,this),this.createRoomResponse=o(this.createRoomResponse,this),this.councilUpdate=o(this.councilUpdate,this),this.closeRoom=o(this.closeRoom,this),this.clearRooms=o(this.clearRooms,this),this.closePrivateTab=o(this.closePrivateTab,this),this.closePrivateChat=o(this.closePrivateChat,this),this.checkNameAvailability=o(this.checkNameAvailability,this),this.checkNameResponse=o(this.checkNameResponse,this),this.checkConnection=o(this.checkConnection,this),this.changeNameResponse=o(this.changeNameResponse,this),this.connect=o(this.connect,this),this.boostSolveMediaResponse=o(this.boostSolveMediaResponse,this),this.boostSolveMedia=o(this.boostSolveMedia,this),this.addUser=o(this.addUser,this),this.activityUpdate=o(this.activityUpdate,this),this.actionMessage=o(this.actionMessage,this),f.__super__.constructor.apply(this,arguments)}
       return a(f,u),
-        f.prototype.defaults={connected:!1,timeServerDifference:0,currentRoomUrl:void 0,theme:"light",sounds_mentioned:!0,sounds_enters:!1,sounds_post:!1,mute_all_sounds:!1,currentSection:"messages"},
+        f.prototype.defaults={
+          connected:!1,
+          timeServerDifference:0,
+          currentRoomUrl:void 0,
+          theme:"light",
+          sounds_mentioned:!0,
+          sounds_enters:!1,
+          sounds_post:!1,
+          sounds_private:!1, //F
+          mute_all_sounds:!1,
+          currentSection:"messages"
+        },
         f.prototype.initialize=function(){return this.user=new t.User,this.users=new Backbone.Collection,this.rooms=new e.Rooms,this.growls=new e.Growls,this.notifications=new e.Notifications,this.karmaBoosts=new e.Offers,this.tokenGrabs=new e.Offers,this.backlogEvents={system_post:"system",adduser:"enter",removeuser:"leave",action:"action",declare:"declare"},this.socket=new t.Socket({host:r.host}),this.rooms.user=this.user,this.privateChats=new e.PrivateChats,MakeChat.browser=function(){if($.browser.mozilla)return"mozilla";if($.browser.webkit)return"webkit";if($.browser.opera)return"opera";if($.browser.msie)return"msie"}(),this.globalCallbacks(),this.onLoad(),this.socket.connect()},
-        f.prototype.onLoad=function(){var e,t,n,r,s,o=this;return this.on("change:currentRoomUrl",this.selectRoomByUrl),this.user.on("change:age",this.requestSetAge),this.user.on("change:gender",this.requestSetGender),n=this.rooms,n.on("requestJoinRoom",this.requestJoinRoom),n.on("requestLeaveRoom",this.requestLeaveRoom),n.on("requestPostMessage",this.requestPostMessage),n.on("requestEditRoom",this.requestEditRoom),n.on("requestRoomUpdate",this.requestRoomUpdate),n.on("selectRoom",this.selectRoom),n.on("change:url",this.selectRoom),n.on("maxChars",this.requestMaxChars),s=this.users,n.on("mentioned",function(){if(o.get("mute_all_sounds"))return;if(o.get("sounds_mentioned"))return i.play("mentioned")}),n.on("enterleave",function(){if(o.get("mute_all_sounds"))return;if(o.get("sounds_enters"))return i.play("mentioned")}),n.on("post",function(){o.get("mute_all_sounds")&&eturn;if(o.get("sounds_post"))return i.play("mentioned")}),e=this.growls,e.on("growlClosed",this.growlClosed),e.on("growlExpire",this.growlExpire),t=this.privateChats,t.on("privateMessage",this.requestPrivateChatMessage).on("requestTypingMessage",this.requestTypingMessage).on("requestLeavePrivateChat",this.requestLeavePrivateChat).on("closePrivateChat",this.closePrivateChat).on("closePrivateTab",this.closePrivateTab).on("add",this.openPrivateTab),r=this.socket,r.on("all",this.checkConnection).on("connect",this.connect).on("ping",this.pong).on("checked_name",this.checkNameResponse).on("name_change_response",this.changeNameResponse).on("set_id",this.setUserIdResponse).on("set_cookie",this.setCookies).on("room_update",this.roomUpdate).on("join_room launch_room",this.joinRoomResponse).on("room_created",this.createRoomResponse).on("close_room",this.closeRoom).on("room_list_clear",this.clearRooms).on("post",this.postMessage).on("action",this.actionMessage).on("backlog",this.roomBackLog).on("declare",this.declareMessage).on("growl",this.growlMessage).on("ping_url",this.pingUrl).on("ping_url_remove",this.pingUrlRemove).on("ga_event",this.gaEvent).on("adduser",this.addUser).on("removeuser",this.removeUser).on("name_update",this.nameUpdate).on("karma_update",this.karmaUpdate).on("token_update",this.tokenUpdate).on("token_grab",this.tokenGrab).on("system_post",this.systemPost).on("ignored",this.ignoreUserResponse).on("unignored",this.unignoreUserResponse).on("idle_state",this.idleUser).on("mod_status",this.modStatus).on("im_message",this.privateMessageResponse).on("im_is_typing",this.privateTypingResponse).on("im_not_typing",this.privateTypingStopResponse).on("im_logoff",this.privateLogOff).on("im_logon",this.privateLogOn).on("set_theme",this.setThemeResponse).on("maxchars",this.setMaxChars).on("boost_solvemedia",this.boostSolveMedia).on("boost_solvemedia_response",this.boostSolveMediaResponse).on("karma_button_highlight",this.karmaButtonHighlight).on("exit_url",this.exitUrl).on("karma_raffle",this.karmaRaffle).on("invite_sent",this.inviteUserResponse).on("youtube",this.youtubeResponse).on("karma_boost",this.karmaBoost).on("council_update",this.councilUpdate).on("whisper",this.whisperUpdate).on("pmthreshold",this.setPMThreshold).on("activity",this.activityUpdate)},
+        f.prototype.onLoad=function(){
+          var e,t,n,r,s,o=this;
+          return this.on("change:currentRoomUrl",this.selectRoomByUrl),
+            this.user.on("change:age",this.requestSetAge),
+            this.user.on("change:gender",this.requestSetGender),
+            n=this.rooms,
+            n.on("requestJoinRoom",this.requestJoinRoom),
+            n.on("requestLeaveRoom",this.requestLeaveRoom),
+            n.on("requestPostMessage",this.requestPostMessage),
+            n.on("requestEditRoom",this.requestEditRoom),
+            n.on("requestRoomUpdate",this.requestRoomUpdate),
+            n.on("selectRoom",this.selectRoom),
+            n.on("change:url",this.selectRoom),
+            n.on("maxChars",this.requestMaxChars),
+            s=this.users,
+            n.on("mentioned",function(){
+              if(o.get("mute_all_sounds"))return;
+              if(o.get("sounds_mentioned"))return i.play("mentioned")
+            }),
+            n.on("enterleave",function(){
+              if(o.get("mute_all_sounds"))return;
+              if(o.get("sounds_enters"))return i.play("mentioned")
+            }),
+            n.on("post",function(){
+              if(o.get("mute_all_sounds"))return; //Fixed typo
+              if(o.get("sounds_post"))return i.play("mentioned")
+            }),
+            e=this.growls,
+            e.on("growlClosed",this.growlClosed),
+            e.on("growlExpire",this.growlExpire),
+            t=this.privateChats,
+            t.on("privateMessage",this.requestPrivateChatMessage)
+              //F+
+              .on("privateMessageResponse",function(){
+                if(o.get("mute_all_sounds"))return;
+                if(o.get("sounds_private"))return i.play("mentioned")
+              })
+              //F-
+              .on("requestTypingMessage",this.requestTypingMessage)
+              .on("requestLeavePrivateChat",this.requestLeavePrivateChat)
+              .on("closePrivateChat",this.closePrivateChat)
+              .on("closePrivateTab",this.closePrivateTab)
+              .on("add",this.openPrivateTab),
+            r=this.socket,
+            r.on("all",this.checkConnection)
+              .on("connect",this.connect)
+              .on("ping",this.pong)
+              .on("checked_name",this.checkNameResponse)
+              .on("name_change_response",this.changeNameResponse)
+              .on("set_id",this.setUserIdResponse)
+              .on("set_cookie",this.setCookies)
+              .on("room_update",this.roomUpdate)
+              .on("join_room launch_room",this.joinRoomResponse)
+              .on("room_created",this.createRoomResponse)
+              .on("close_room",this.closeRoom)
+              .on("room_list_clear",this.clearRooms)
+              .on("post",this.postMessage)
+              .on("action",this.actionMessage)
+              .on("backlog",this.roomBackLog)
+              .on("declare",this.declareMessage)
+              .on("growl",this.growlMessage)
+              .on("ping_url",this.pingUrl)
+              .on("ping_url_remove",this.pingUrlRemove)
+              .on("ga_event",this.gaEvent)
+              .on("adduser",this.addUser)
+              .on("removeuser",this.removeUser)
+              .on("name_update",this.nameUpdate)
+              .on("karma_update",this.karmaUpdate)
+              .on("token_update",this.tokenUpdate)
+              .on("token_grab",this.tokenGrab)
+              .on("system_post",this.systemPost)
+              .on("ignored",this.ignoreUserResponse)
+              .on("unignored",this.unignoreUserResponse)
+              .on("idle_state",this.idleUser)
+              .on("mod_status",this.modStatus)
+              .on("im_message",this.privateMessageResponse)
+              .on("im_is_typing",this.privateTypingResponse)
+              .on("im_not_typing",this.privateTypingStopResponse)
+              .on("im_logoff",this.privateLogOff)
+              .on("im_logon",this.privateLogOn)
+              .on("set_theme",this.setThemeResponse)
+              .on("maxchars",this.setMaxChars)
+              .on("boost_solvemedia",this.boostSolveMedia)
+              .on("boost_solvemedia_response",this.boostSolveMediaResponse)
+              .on("karma_button_highlight",this.karmaButtonHighlight)
+              .on("exit_url",this.exitUrl)
+              .on("karma_raffle",this.karmaRaffle)
+              .on("invite_sent",this.inviteUserResponse)
+              .on("youtube",this.youtubeResponse)
+              .on("karma_boost",this.karmaBoost)
+              .on("council_update",this.councilUpdate)
+              .on("whisper",this.whisperUpdate)
+              .on("pmthreshold",this.setPMThreshold)
+              .on("activity",this.activityUpdate)
+        },
         f.prototype.actionMessage=function(e){var t,n;t=this.rooms.get(e.RoomID);if(t==null)return;return n="action",t.post({id:e.UID,name:e.Name,post:e.Post||e.Message,time:e.Time,type:n})},
         f.prototype.activityUpdate=function(e){return this.trigger("activity",{message:e.Message,type:e.Type,notify:e.Notification,time:e.Time})},
         f.prototype.addUser=function(e){
@@ -950,7 +1057,17 @@ function enhancinate() {
         f.prototype.postMessage=function(e){var t,n;t=this.rooms.get(e.RoomID);if(t==null)return;return this.user.id===e.UID&&(n="self"),t.post({id:e.UID,name:e.Name,post:e.Post,time:e.Time,type:n})},
         f.prototype.privateLogOff=function(e){var t;t=this.privateChats.get(e.UID);if(t==null)return;return t.set({online:!1})},
         f.prototype.privateLogOn=function(e){var t;t=this.privateChats.get(e.UID);if(t==null)return;return t.set({online:!0,name:e.Name})},
-        f.prototype.privateMessageResponse=function(e){var t,n,r,i;return t=e.UID,n=e.Message,r=this.privateChats.get(t)||this.newPrivateChat(t),i=e.Type,i.indexOf("system")>-1&&(i+=" announce"),r.post({name:r.get("name"),post:n,time:(new Date).getTime()/1e3,type:i}),this.trigger("notification",{type:"messages",message:n})},
+        f.prototype.privateMessageResponse=function(e){
+          var t,n,r,i;
+          return t=e.UID,
+            n=e.Message,
+            r=this.privateChats.get(t)||this.newPrivateChat(t),
+            i=e.Type,
+            i.indexOf("system")>-1&&(i+=" announce"),
+            r.post({name:r.get("name"),post:n,time:(new Date).getTime()/1e3,type:i}),
+            this.privateChats.trigger("privateMessageResponse",this.privateChats), //F
+            this.trigger("notification",{type:"messages",message:n})
+        },
         f.prototype.privateTypingResponse=function(e){var t;t=this.privateChats.get(e.UID);if(t==null)return;return t.set({typing:!0})},
         f.prototype.privateTypingStopResponse=function(e){var t;t=this.privateChats.get(e.UID);if(t==null)return;return t.set({typing:!1})},
         f.prototype.removeUser=function(e){
@@ -1207,6 +1324,7 @@ function enhancinate() {
           this.toggleSoundsPost=m(this.toggleSoundsPost,this),
           this.toggleSoundsEnter=m(this.toggleSoundsEnter,this),
           this.toggleSoundsMention=m(this.toggleSoundsMention,this),
+          this.toggleSoundsPrivate=m(this.toggleSoundsPrivate,this), //F
           this.toggleTheme=m(this.toggleTheme,this),
           this.toggleChatSize=m(this.toggleChatSize,this),
           this.toggleHideEnter=m(this.toggleHideEnter,this), //C
@@ -1218,6 +1336,7 @@ function enhancinate() {
           this.changeTheme=m(this.changeTheme,this),
           this.changeSoundsEnters=m(this.changeSoundsEnters,this),
           this.changeSoundsMentioned=m(this.changeSoundsMentioned,this),
+          this.changeSoundsPrivate=m(this.changeSoundsPrivate,this), //F
           this.changeMuteAll=m(this.changeMuteAll,this),
           t.__super__.constructor.apply(this,arguments)
       }
@@ -1228,6 +1347,7 @@ function enhancinate() {
           "click .mention":"toggleSoundsMention",
           "click .enter":"toggleSoundsEnter",
           "click .message":"toggleSoundsPost",
+          "click .private":"toggleSoundsPrivate", //F
           "click .chat.size":"toggleChatSize",
           "click .hide-enter":"toggleHideEnter", //C
           "click .hide-rename":"toggleHideRename", //D
@@ -1238,6 +1358,7 @@ function enhancinate() {
             this.model.on("change:sounds_mentioned",this.changeSoundsMentioned),
             this.model.on("change:sounds_enters",this.changeSoundsEnters),
             this.model.on("change:sounds_post",this.changeSoundsPost),
+            this.model.on("change:sounds_private",this.changeSoundsPrivate), //F
             this.model.on("change:chat_size",this.changeChatSize),
             this.model.on("change:hide_enter",this.changeHideEnter), //C
             this.model.on("change:hide_rename",this.changeHideRename), //D
@@ -1273,6 +1394,13 @@ function enhancinate() {
           return t=this.$el.find(".sfx.message input[type=checkbox]"),
             e.get("sounds_post")?t.attr("checked","checked"):t.removeAttr("checked")
         },
+        //F+
+        t.prototype.changeSoundsPrivate=function(e){
+          var t;
+          return t=this.$el.find(".sfx.private input[type=checkbox]"),
+            e.get("sounds_private")?t.attr("checked","checked"):t.removeAttr("checked")
+        },
+        //F-
         t.prototype.changeChatSize=function(e){
           var t;
           return t=this.$el.find(".chat.size input[type=checkbox]"),
@@ -1322,6 +1450,13 @@ function enhancinate() {
           return e=this.$el.find(".theme input[type=checkbox]"),
             e.attr("checked")?this.model.requestSetTheme("light"):this.model.requestSetTheme("dark")
         },
+        //F+
+        t.prototype.toggleSoundsPrivate=function(){
+          var e;
+          return e=this.model.get("sounds_private"),
+            this.model.set({sounds_private:!e})
+        },
+        //F-
         t.prototype.toggleSoundsMention=function(){
           var e;
           return e=this.model.get("sounds_mentioned"),
