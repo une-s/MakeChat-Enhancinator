@@ -615,7 +615,10 @@ function enhancinate() {
     window.Emotes=function(){
       function e(){}
       return e.list=[],
-        e.add=function(e,t){return this.list.push([e,t])},
+        e.add=function(e,t){
+          e=new RegExp(e.replace(/[()*?]/g,"\\$&"),"g"); //H
+          return this.list.push([e,t])
+        },
         e.imgify=function(e){return'<img src="/images/emotes/'+e+'.gif">'},
         e.emotifyBasic=function(e){var t,n,r,i,s,o;o=this.list;for(i=0,s=o.length;i<s;i++)t=o[i],n=t[0],r=this.imgify(t[1]),e=e.replace(n,r);return e},
         e.emotifyPng=function(e){return'<span class="emotes emotes-'+e+'"></span>'},
