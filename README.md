@@ -17,3 +17,4 @@ A userscript to make Zobe.com better, as the website's development has been disc
 - Corrected the message on karma boost completion: Next available in 4 hours, not 6 hours
 - Added sound notification setting: "Someone sends a private msg"
 - Corrected the message when unable to send declares: Win raffle, not earn more karma
+- Added support for multiple of the same (basic) emoticons
