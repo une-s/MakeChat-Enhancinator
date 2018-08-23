@@ -1,3 +1,7 @@
+1.5.2018.08
+- Improved solution for non-Firefox users. Reloading page now unnecessary, manual jQuery load unnecessary
+- SUpport for multiple of the same (basic) emoticons
+
 1.4.2018.08
 - Fixed system message when can't send declares
 - Manual jQuery load for non-Firefoc users
