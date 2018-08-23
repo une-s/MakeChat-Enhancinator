@@ -1,4 +1,4 @@
-# MakeChat-Enhancinator
+# MakeChat Enhancinator
 
 A userscript to make Zobe.com better, as the website's development has been discontinued.
 
