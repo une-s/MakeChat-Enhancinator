@@ -226,10 +226,16 @@ function enhancinate() {
     return $el;
   }
 
-  function correctMessage(msg) {
-    return msg.replace('You can use this boost again in 6 hours', function(match) {
-      return match.replace('6','4');
-    })
+  function correctMessage(msg, type) {
+    switch(type) {
+      case "growl":
+        return msg.replace('You can use this boost again in 6 hours', function(match) {
+          return match.replace('6','4');
+        });
+      case "system":
+        return msg.replace("Earm more karma to send declare messages.", "Win the karma raffle to send a declare message.");
+    }
+    return msg;
   }
 
 
@@ -1044,7 +1050,7 @@ function enhancinate() {
         f.prototype.growlExpire=function(e){return this.socket.send("system_growl_close",{GrowlID:e,Closed:"expired"})},
         f.prototype.growlMessage=function(e){
           var t,n,r;
-          e.Message = correctMessage(e.Message), //E
+          e.Message = correctMessage(e.Message, "growl"), //E
           this.growls.add({id:e.GrowlID,message:e.Message,sticky:e.Sticky,timeout:e.Timeout,roomId:e.RoomID}),
           t=this.growls.get(e.GrowlID),
           r=e.RoomID,
@@ -1131,7 +1137,13 @@ function enhancinate() {
         f.prototype.setPrivateChatThreshold=function(e){return this.socket.send("karma_threshold",{Threshold:e})},
         f.prototype.setThemeResponse=function(e){return console.log("yo set theme",e),this.set({theme:e.Theme})},
         f.prototype.setUserIdResponse=function(e){var t,n=this;return t=e.PMThresholdOptions,this.user.set({id:e.PubId,privateId:e.ID,name:this.user.get("tempName")}),_.each(t,function(e){return n.trigger("thresholdOption",e)}),this.trigger("setUserID",this.user)},
-        f.prototype.systemPost=function(e){var t;t=this.rooms.get(e.RoomID);if(t==null)return;return t.post({name:"system",post:e.Message,time:e.Time,type:"system"})},
+        f.prototype.systemPost=function(e){
+          var t;
+          t=this.rooms.get(e.RoomID);
+          if(t==null)return;
+          e.Message = correctMessage(e.Message, "system"); //G
+          return t.post({name:"system",post:e.Message,time:e.Time,type:"system"})
+        },
         f.prototype.tokenGrab=function(e){var t,n,r;r=e.Type,t=e.State;if(r==="youtube_success")return this.trigger("tokenGrabResult",e.Success);if(!(n=this.tokenGrabs.get(r)))return this.tokenGrabs.add({id:r,type:r,state:t,title:e.Title,reward:e.Reward,message:e.Description,instructions:e.Instructions,url1:e.URL1,url2:e.URL2,url3:e.URL3});if(t==="disabled")return this.tokenGrabs.remove(n)},
         f.prototype.tokenGrabSubmit=function(e){return this.socket.send("token_grab_youtube",{Code1:e.code1,Code2:e.code2,Code3:e.code3})},
         f.prototype.tokenUpdate=function(e){var t;return t=e.Tokens,this.user.set({tokens:t})},
