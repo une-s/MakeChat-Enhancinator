@@ -1,7 +1,6 @@
 // ==UserScript==
 // @name         MakeChat Enhancinator
-// @namespace    https://unern.com/
-// @version      1.5.2018.08
+// @version      1.6.2018.08
 // @description  Enhancement script for Zobe and potentially TeenChat in the future.
 // @downloadURL  https://raw.github.com/une-s/MakeChat-Enhancinator/master/makechat-enhancinator.user.js
 // @author       Une S
@@ -220,6 +219,7 @@ function enhancinate() {
 
 
   // The original minified script with edits
+  // Edits are commented
 
   /*  SWFObject v2.2 <http://code.google.com/p/swfobject/>
     iss released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
@@ -616,7 +616,7 @@ function enhancinate() {
       function e(){}
       return e.list=[],
         e.add=function(e,t){
-          e=new RegExp(e.replace(/[()*?]/g,"\\$&"),"g"); //H
+          e=new RegExp(e.replace(/[()*?]/g,"\\$&"),"g"); //1.5 - Allow multiple of same basic emoji
           return this.list.push([e,t])
         },
         e.imgify=function(e){return'<img src="/images/emotes/'+e+'.gif">'},
@@ -629,7 +629,7 @@ function enhancinate() {
             e=e.replace(/:(trollface):/g,function(e,n){return t.emotifyPng("troll")}),
             e=e.replace(/:(facepalm):/g,function(e,n){return t.emotifyPng(n)}),
             e=e.replace(/:(sadfrog):/g,function(e,n){return t.emotifyPng(n)}),
-            e=e.replace(/:(feelsbadman):/g,function(e,n){return t.emotifyPng("sadfrog")}), //A
+            e=e.replace(/:(feelsbadman):/g,function(e,n){return t.emotifyPng("sadfrog")}), //1.0 - :feelsbadman: fix
             e=e.replace(/:(lol):/g,function(e,n){return t.emotifyPng(n)}),
             e=e.replace(/:(LOL):/g,function(e,n){return t.emotifyPng("lol")}),
             e=e.replace(/(T_T)/g,function(e,n){return t.emotifyPng(n)}),
@@ -756,7 +756,7 @@ function enhancinate() {
             mentioned:!0,
             enterleave:!1,
             message:!1,
-            private:!1, //F
+            private:!1, //1.3 - sound notification private message
             muteall:!1
           },
           timeout:4e4,
@@ -836,7 +836,18 @@ function enhancinate() {
       function t(){return this.retryXMLConnection=r(this.retryXMLConnection,this),t.__super__.constructor.apply(this,arguments)}
       return s(t,e),
         t.prototype.connect=function(){switch(MakeChat.socketType){case"websockets":return this.connectWebSockets();case"flashsockets":return this.connectFlashSockets()}},
-        t.prototype.connectWebSockets=function(){var e,t,r=this,i;n("establishing websockets connection.."),e=this.get("host"),t=MakeChat.settings.portWebSocket,this.socket=new WebSocket("ws://"+e+":"+t+"/ws"),this.socket.onopen=function(e){return n("connected via websockets"),r.onConnect(e)},this.socket.onclose=function(e){return n("websockets closed"),r.onClose(e)},this.socket.onmessage=function(e){return r.onMessage(e.data)},i=this.socket.send,this.socket.send=function(e){_debug.out&&console.log('out -> '+e);i.apply(r.socket,arguments);}}, //Debug: Added var i & 2 commands
+        t.prototype.connectWebSockets=function(){
+          var e,t,r=this,i; //Debug: Added var i
+          n("establishing websockets connection.."),
+          e=this.get("host"),
+          t=MakeChat.settings.portWebSocket,
+          this.socket=new WebSocket("ws://"+e+":"+t+"/ws"),
+          this.socket.onopen=function(e){return n("connected via websockets"),r.onConnect(e)},
+          this.socket.onclose=function(e){return n("websockets closed"),r.onClose(e)},
+          this.socket.onmessage=function(e){return r.onMessage(e.data)},
+          i=this.socket.send, //Debug
+          this.socket.send=function(e){_debug.out&&console.log('out -> '+e);i.apply(r.socket,arguments);} //Debug: Log sent data
+        },
         t.prototype.connectFlashSockets=function(){var e,t,r,i,s=this;n("establishing flashsockets connection.."),e=this.get("host"),t=MakeChat.settings.portFlashSocket,i='<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0" width="1" height="1" id="swfsocket">\n<param name="allowScriptAccess" value="always" />\n<param name="movie" value="'+MakeChat.settings.socketSwfUrl+'" />\n<param name="quality" value="high" />\n<param name="bgcolor" value="#ffcc00" />\n<embed src="'+MakeChat.settings.socketSwfUrl+'" quality="high" bgcolor="#ffcc00" width="1" height="1" name="swfsocket" align="middle" allowScriptAccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" />\n</object>',r=document.getElementById("swfContainer"),r.innerHTML=i,MakeChat.gateway.init=function(e){return n("JavaScript to Flash connected")},MakeChat.gateway.connect=function(e){return n("connected via swfsockets"),s.onConnect(e)},MakeChat.gateway.message=function(e){return s.onMessage(e)},MakeChat.gateway.error=function(e){return n("error flashsocket")},MakeChat.gateway.close=function(e){return n("close flashsocket",e)},this.retryXMLConnection()},
         t.prototype.retryXMLConnection=function(){var e,t;e=this.get("host"),t=document.getElementById("swfsocket");if(t==null){n("xmlsocket retrying"),after(1e3,this.retryXMLConnection);if(!(this.retries++<50))return}return this.socket=t,this.socket.connect({init:"MakeChat.gateway.init",connect:"MakeChat.gateway.connect",message:"MakeChat.gateway.message",error:"MakeChat.gateway.error",close:"MakeChat.gateway.close",port:MakeChat.settings.portFlashSocket,host:this.get("host")})},
         t.prototype.onClose=function(){this.trigger("close")},
@@ -848,15 +859,15 @@ function enhancinate() {
         t.prototype.eventQueue=[],
         t.prototype.timeoutId=null,
         t.prototype.publish=function(e,t){
-          _debug.in&&console.log('in -> '+e+': '+JSON.stringify(t)); //Debug
+          _debug.in&&console.log('in -> '+e+': '+JSON.stringify(t)); //Debug: Log received data
           return this.trigger(e,t)
         },
         t.prototype.releaseBufferedEvents=function(){var e=this;return this.bufferSocketEvents=!1,_.each(this.bufferedCommands,function(t,n){return e.publish(t.command,t.json)}),this.bufferedCommands=[]},
         t.prototype.send=function(e,t){
           if(e==null&&t==null)return;
-          var r=e=="post"&&"Post"||e=="im_post"&&"Message"; //A
+          var r=e=="post"&&"Post"||e=="im_post"&&"Message"; //1.0 - :feelsbadman: fix
           return t.C=e,
-            r&&(t[r]=t[r].replace(/:feelsbadman:/g,":sadfrog:")), //A
+            r&&(t[r]=t[r].replace(/:feelsbadman:/g,":sadfrog:")), //1.0 - :feelsbadman: fix
             t=JSON.stringify(t),
             n("<-    ",e,t),
             this.socket.send(t)
@@ -884,7 +895,7 @@ function enhancinate() {
           sounds_mentioned:!0,
           sounds_enters:!1,
           sounds_post:!1,
-          sounds_private:!1, //F
+          sounds_private:!1, //1.3 - sound notification private message
           mute_all_sounds:!1,
           currentSection:"messages"
         },
@@ -921,12 +932,12 @@ function enhancinate() {
             e.on("growlExpire",this.growlExpire),
             t=this.privateChats,
             t.on("privateMessage",this.requestPrivateChatMessage)
-              //F+
+              //{1.3 - sound notification private message
               .on("privateMessageResponse",function(){
                 if(o.get("mute_all_sounds"))return;
                 if(o.get("sounds_private"))return i.play("mentioned")
               })
-              //F-
+              //}
               .on("requestTypingMessage",this.requestTypingMessage)
               .on("requestLeavePrivateChat",this.requestLeavePrivateChat)
               .on("closePrivateChat",this.closePrivateChat)
@@ -999,7 +1010,7 @@ function enhancinate() {
           t.on("change",function(){return i.set(t.attributes)}),
           this.user.id===i.id&&i.set({self:!0});
           if(e.Msg.length>0){
-            !this.get('hide_enter')&& //C
+            !this.get('hide_enter')&& //1.0 - hide enter/leave
             	r.post({id:s,post:e.Msg,time:e.Time,type:"enter"}),
             n=r.users.find(function(e){return e.id===o.user.id&&e.get("mod")});
             if(n==null)return;
@@ -1033,7 +1044,7 @@ function enhancinate() {
         f.prototype.growlExpire=function(e){return this.socket.send("system_growl_close",{GrowlID:e,Closed:"expired"})},
         f.prototype.growlMessage=function(e){
           var t,n,r;
-          e.Message = correctMessage(e.Message, "growl"), //E
+          e.Message = correctMessage(e.Message, "growl"), //1.0 - Correct grpwl messages
           this.growls.add({id:e.GrowlID,message:e.Message,sticky:e.Sticky,timeout:e.Timeout,roomId:e.RoomID}),
           t=this.growls.get(e.GrowlID),
           r=e.RoomID,
@@ -1071,7 +1082,7 @@ function enhancinate() {
             i=e.Type,
             i.indexOf("system")>-1&&(i+=" announce"),
             r.post({name:r.get("name"),post:n,time:(new Date).getTime()/1e3,type:i}),
-            this.privateChats.trigger("privateMessageResponse",this.privateChats), //F
+            this.privateChats.trigger("privateMessageResponse",this.privateChats), //1.3 - sound notification private message
             this.trigger("notification",{type:"messages",message:n})
         },
         f.prototype.privateTypingResponse=function(e){var t;t=this.privateChats.get(e.UID);if(t==null)return;return t.set({typing:!0})},
@@ -1082,7 +1093,7 @@ function enhancinate() {
           if(t==null)return;
           n=t.users.get(e.UID);
           if(n==null)return;
-          return !this.get('hide_enter')&& //C
+          return !this.get('hide_enter')&& //1.0 - hide enter/leave
             	t.post({id:n.id,post:e.Msg,time:e.Time,type:"leave"}),
             n.trigger("leave",n),
             t.users.remove(n)
@@ -1124,7 +1135,7 @@ function enhancinate() {
           var t;
           t=this.rooms.get(e.RoomID);
           if(t==null)return;
-          e.Message = correctMessage(e.Message, "system"); //G
+          e.Message = correctMessage(e.Message, "system"); //1.4 Correct system messages
           return t.post({name:"system",post:e.Message,time:e.Time,type:"system"})
         },
         f.prototype.tokenGrab=function(e){var t,n,r;r=e.Type,t=e.State;if(r==="youtube_success")return this.trigger("tokenGrabResult",e.Success);if(!(n=this.tokenGrabs.get(r)))return this.tokenGrabs.add({id:r,type:r,state:t,title:e.Title,reward:e.Reward,message:e.Description,instructions:e.Instructions,url1:e.URL1,url2:e.URL2,url3:e.URL3});if(t==="disabled")return this.tokenGrabs.remove(n)},
@@ -1141,11 +1152,11 @@ function enhancinate() {
   }.call(this),
   function(){var e,t,n=function(e,t){return function(){return e.apply(t,arguments)}},r={}.hasOwnProperty,i=function(e,t){function i(){this.constructor=e}for(var n in t)r.call(t,n)&&(e[n]=t[n]);return i.prototype=t.prototype,e.prototype=new i,e.__super__=t.prototype,e};e=MakeChat.Models,t=MakeChat.patterns,e.Growl=function(e){function r(){return this.tick=n(this.tick,this),r.__super__.constructor.apply(this,arguments)}return i(r,e),r.prototype.defaults={time:0,sticky:!1,message:"",expired:!1,closed:!1},r.prototype.initialize=function(){var e;return e=this.get("message"),this.set({message:this.parseCommands(e,this.id)}),this.tick()},r.prototype.close=function(){return this.set({closed:!0})},r.prototype.parseCommands=function(e,n){return e.replace(t.regexParseGrowlButton,function(e,r,i,s){return i.match(t.regexUrl)?'<a data-callback="'+i+'" class="growl_button '+s+'" href="'+i+'" target="_blank">'+r+"</a>":'<a data-callback="'+i+'" class="growl_button '+s+'" onclick="window.MakeChat.callbacks.trigger(\''+i+"','"+s+"','"+n+"');\">"+r+"</a>"})},r.prototype.tick=function(){var e;return e=this.get("timeout"),e--,this.set({timeout:e}),e>0?after(1e3,this.tick):this.set({expired:!0})},r}(Backbone.Model)}.call(this),
   function(){
-    var e,t,n,u,r=function(e,t){return function(){return e.apply(t,arguments)}},i={}.hasOwnProperty,s=function(e,t){function r(){this.constructor=e}for(var n in t)i.call(t,n)&&(e[n]=t[n]);return r.prototype=t.prototype,e.prototype=new r,e.__super__=t.prototype,e};
+    var e,t,n,u,r=function(e,t){return function(){return e.apply(t,arguments)}},i={}.hasOwnProperty,s=function(e,t){function r(){this.constructor=e}for(var n in t)i.call(t,n)&&(e[n]=t[n]);return r.prototype=t.prototype,e.prototype=new r,e.__super__=t.prototype,e}; //1.0 - Added variable u
     t=MakeChat.Models,
     e=MakeChat.Collections,
     n=MakeChat.patterns,
-    u=MakeChat.settings, //1
+    u=MakeChat.settings, //1.0 - Added variable
     t.Room=function(i){
       function o(){
         return this.showModOptions=r(this.showModOptions,this),this.sendMessage=r(this.sendMessage,this),this.requestUnignoreUser=r(this.requestUnignoreUser,this),this.requestPrivateChat=r(this.requestPrivateChat,this),this.requestKickUser=r(this.requestKickUser,this),this.requestInviteUser=r(this.requestInviteUser,this),this.requestIgnoreUser=r(this.requestIgnoreUser,this),this.requestAssignModUser=r(this.requestAssignModUser,this),this.join=r(this.join,this),this.editRoom=r(this.editRoom,this),this.changeUserName=r(this.changeUserName,this),this.addRemoveUser=r(this.addRemoveUser,this),o.__super__.constructor.apply(this,arguments)}
@@ -1156,7 +1167,7 @@ function enhancinate() {
         o.prototype.addRemoveUser=function(){return this.trigger("enterleave",this)},
         o.prototype.close=function(e){return this.set({subscribed:!e.immediate,display:!1}),this.trigger("closed",e)},
         o.prototype.changeUserName=function(e){
-          return !u.hide_rename&& //D
+          return !u.hide_rename&& //1.0 hide name change
         			this.post({id:e.id,name:e.get("name"),post:""+e.previous("name")+" is now "+e.get("name"),type:"system"})
         },
         o.prototype.deselect=function(){return this.set({selected:!1})},
@@ -1336,19 +1347,19 @@ function enhancinate() {
           this.toggleSoundsPost=m(this.toggleSoundsPost,this),
           this.toggleSoundsEnter=m(this.toggleSoundsEnter,this),
           this.toggleSoundsMention=m(this.toggleSoundsMention,this),
-          this.toggleSoundsPrivate=m(this.toggleSoundsPrivate,this), //F
+          this.toggleSoundsPrivate=m(this.toggleSoundsPrivate,this), //1.3 - sound notification private message
           this.toggleTheme=m(this.toggleTheme,this),
           this.toggleChatSize=m(this.toggleChatSize,this),
-          this.toggleHideEnter=m(this.toggleHideEnter,this), //C
-          this.toggleHideRename=m(this.toggleHideRename,this), //D
-          this.changeHideEnter=m(this.changeHideEnter,this), //C
-          this.changeHideRename=m(this.changeHideRename,this), //D
+          this.toggleHideEnter=m(this.toggleHideEnter,this), //1.0 - hide enter/leave
+          this.toggleHideRename=m(this.toggleHideRename,this), //1.0 - hide name change
+          this.changeHideEnter=m(this.changeHideEnter,this), //1.0 - hide enter/leave
+          this.changeHideRename=m(this.changeHideRename,this), //1.0 - hide name change
           this.changeChatSize=m(this.changeChatSize,this),
           this.changeSoundsPost=m(this.changeSoundsPost,this),
           this.changeTheme=m(this.changeTheme,this),
           this.changeSoundsEnters=m(this.changeSoundsEnters,this),
           this.changeSoundsMentioned=m(this.changeSoundsMentioned,this),
-          this.changeSoundsPrivate=m(this.changeSoundsPrivate,this), //F
+          this.changeSoundsPrivate=m(this.changeSoundsPrivate,this), //1.3 - sound notification private message
           this.changeMuteAll=m(this.changeMuteAll,this),
           t.__super__.constructor.apply(this,arguments)
       }
@@ -1359,10 +1370,10 @@ function enhancinate() {
           "click .mention":"toggleSoundsMention",
           "click .enter":"toggleSoundsEnter",
           "click .message":"toggleSoundsPost",
-          "click .private":"toggleSoundsPrivate", //F
+          "click .private":"toggleSoundsPrivate", //1.3 - sound notification private message
           "click .chat.size":"toggleChatSize",
-          "click .hide-enter":"toggleHideEnter", //C
-          "click .hide-rename":"toggleHideRename", //D
+          "click .hide-enter":"toggleHideEnter", //1.0 - hide enter/leave
+          "click .hide-rename":"toggleHideRename", //1.0 - hide name change
           "click .all":"toggleSoundsAll"
         },
         t.prototype.onLoad=function(){
@@ -1370,10 +1381,10 @@ function enhancinate() {
             this.model.on("change:sounds_mentioned",this.changeSoundsMentioned),
             this.model.on("change:sounds_enters",this.changeSoundsEnters),
             this.model.on("change:sounds_post",this.changeSoundsPost),
-            this.model.on("change:sounds_private",this.changeSoundsPrivate), //F
+            this.model.on("change:sounds_private",this.changeSoundsPrivate), //1.3 - sound notification private message
             this.model.on("change:chat_size",this.changeChatSize),
-            this.model.on("change:hide_enter",this.changeHideEnter), //C
-            this.model.on("change:hide_rename",this.changeHideRename), //D
+            this.model.on("change:hide_enter",this.changeHideEnter), //1.0 - hide enter/leave
+            this.model.on("change:hide_rename",this.changeHideRename), //1.0 - hide name change
             this.model.on("change:mute_all_sounds",this.changeMuteAll),
             this.changeTheme(this.model),
             this.changeSoundsMentioned(this.model),
@@ -1406,32 +1417,32 @@ function enhancinate() {
           return t=this.$el.find(".sfx.message input[type=checkbox]"),
             e.get("sounds_post")?t.attr("checked","checked"):t.removeAttr("checked")
         },
-        //F+
+        //{1.3 - sound notification private message
         t.prototype.changeSoundsPrivate=function(e){
           var t;
           return t=this.$el.find(".sfx.private input[type=checkbox]"),
             e.get("sounds_private")?t.attr("checked","checked"):t.removeAttr("checked")
         },
-        //F-
+        //}
         t.prototype.changeChatSize=function(e){
           var t;
           return t=this.$el.find(".chat.size input[type=checkbox]"),
             e.get("chat_size")?t.attr("checked","checked"):t.removeAttr("checked")
         },
-        //C+
+        //{1.0 - hide enter/leave
         t.prototype.changeHideEnter=function(e){
           var t;
           return t=this.$el.find(".hide-enter input[type=checkbox]"),
             (c.hide_enter=e.get("hide_enter"))?t.attr("checked","checked"):t.removeAttr("checked")
         },
-        //C-
-        //D+
+        //}
+        //{1.0 - hide name change
         t.prototype.changeHideRename=function(e){
           var t;
           return t=this.$el.find(".hide-rename input[type=checkbox]"),
             (c.hide_rename=e.get("hide_rename"))?t.attr("checked","checked"):t.removeAttr("checked")
         },
-        //D-
+        //}
         t.prototype.onShow=function(){
           return this.$el.removeClass("hidden")
         },
@@ -1443,32 +1454,32 @@ function enhancinate() {
           return t=this.model.get("chat_size"),
             this.model.set({chat_size:!t})
         },
-        //C+
+        //{1.0 - hide enter/leave
         t.prototype.toggleHideEnter=function(){
           var e;
           return e=this.model.get("hide_enter"),
             this.model.set({hide_enter:!e})
         },
-        //C-
-        //D+
+        //}
+        //{1.0 - hide name change
         t.prototype.toggleHideRename=function(){
           var e;
           return e=this.model.get("hide_rename"),
             this.model.set({hide_rename:!e})
         },
-        //D-
+        //}
         t.prototype.toggleTheme=function(){
           var e;
           return e=this.$el.find(".theme input[type=checkbox]"),
             e.attr("checked")?this.model.requestSetTheme("light"):this.model.requestSetTheme("dark")
         },
-        //F+
+        //{1.3 - sound notification private message
         t.prototype.toggleSoundsPrivate=function(){
           var e;
           return e=this.model.get("sounds_private"),
             this.model.set({sounds_private:!e})
         },
-        //F-
+        //}
         t.prototype.toggleSoundsMention=function(){
           var e;
           return e=this.model.get("sounds_mentioned"),
@@ -1501,7 +1512,7 @@ function enhancinate() {
         t.prototype.onLoad=function(){},
         t.prototype.render=function(e){
           var t;
-          return t=this.$el.find(".content"),editHelp(t.html(e)) //B
+          return t=this.$el.find(".content"),editHelp(t.html(e)) //1.0 - Edit help
         },
         t.prototype.onShow=function(){
           var e,t;
@@ -1519,7 +1530,32 @@ function enhancinate() {
         t
     }(d.Modal),
     t=function(e){function t(){return this.editRoom=m(this.editRoom,this),t.__super__.constructor.apply(this,arguments)}return y(t,e),t.prototype.events={"click .close":"hide"},t.prototype.initialize=function(){return this.model.on("editRoom",this.editRoom)},t.prototype.editRoom=function(e){var t,n,r,i=this;return t=this.$el.find(".room_name input"),r=this.$el.find(".room_url input"),n=this.$el.find(".mod.button"),t.val(e.get("name")),r.val(e.get("url")),t.off().keyup(function(n){if(n.keyCode!==l.ENTER)return;if(e.get("name")===t.val()&&e.get("url")===r.val())return;return e.update({name:t.val(),url:r.val()}),i.hide()}),r.off().keyup(function(n){if(n.keyCode!==l.ENTER)return;if(e.get("name")===t.val()&&e.get("url")===r.val())return;return e.update({name:t.val(),url:r.val()}),i.hide()}),n.off().click(function(){if(e.get("name")===t.val()&&e.get("url")===r.val())return;return e.update({name:t.val(),url:r.val()}),i.hide()}),after(100,function(){return t.focus()}),this.show()},t.prototype.onShow=function(){return this.$el.removeClass("hidden")},t.prototype.onHide=function(){return this.$el.addClass("hidden")},t}(d.Modal),
-    i=function(e){function t(){return this.sent=m(this.sent,this),this.render=m(this.render,this),t.__super__.constructor.apply(this,arguments)}return y(t,e),t.prototype.events={"click .cancel":"hide","click .close":"hide"},t.prototype.initialize=function(){var e,t;return this.selected=[],e=this.model,t=e.users,t.on("sendInvite",this.render),this.model.on("inviteSent",this.sent),this.tpl=_.template($("#tpl-invite-room").html()),this.tplMessage=_.template('Invite <span class="username"><%= name %></span> to which room(s)?')},t.prototype.render=function(e){var t,n,r,i,s,o=this;return r=this.model.rooms.where({subscribed:!0}),r=_.reject(r,function(t){return t.users.get(e.id)}),i=[],t=this.$el.find("ul"),s=this.$el.find(".invite"),n=this.$el.find(".message"),t.empty(),s.off(),this.$el.find(".cancel").show(),_.each(r,function(e){var n;return n=$(o.tpl(e.toJSON())),n.click(function(){return n.hasClass("checked")?(n.removeClass("checked"),i.splice(i.indexOf(e.id),1)):(n.addClass("checked"),i.push(e.id))}),t.append(n)}),r.length>0?(n.html(this.tplMessage(e.toJSON())),s.click(function(){return o.sendInvites(e.id,i)}),s.show()):(n.html("No rooms available."),s.hide()),this.show()},t.prototype.sendInvites=function(e,t){var n=this;return _.each(t,function(t){return n.model.sendRoomInvite({userId:e,roomId:t})}),this.sent()},t.prototype.sent=function(){return this.$el.find(".message").text("Invite sent!"),this.$el.find("ul").empty(),this.$el.find(".invite, .cancel").hide(),this.$el.find(".invite").off()},t.prototype.onShow=function(){return this.$el.removeClass("hidden"),this.$el.find(".modal").removeClass("hidden")},t.prototype.onHide=function(){return this.$el.find(".modal").addClass("hidden")},t}(d.Modal),
+    i=function(e){
+      function t(){return this.sent=m(this.sent,this),this.render=m(this.render,this),t.__super__.constructor.apply(this,arguments)}
+      return y(t,e),
+        t.prototype.events={"click .cancel":"hide","click .close":"hide"},
+        t.prototype.initialize=function(){var e,t;return this.selected=[],e=this.model,t=e.users,t.on("sendInvite",this.render),this.model.on("inviteSent",this.sent),this.tpl=_.template($("#tpl-invite-room").html()),this.tplMessage=_.template('Invite <span class="username"><%= name %></span> to which room(s)?')},
+        t.prototype.render=function(e){
+          var t,n,r,i,s,o=this;
+          return r=this.model.rooms.where({subscribed:!0}),
+            r=_.reject(r,function(t){return t.users.get(e.id)}),
+            i=[],
+            t=this.$el.find("ul"),
+            s=this.$el.find(".invite"),
+            n=this.$el.find(".message"),
+            t.empty(),
+            s.off(),
+            this.$el.find(".cancel").show(),
+            _.each(r,function(e){var n;return n=$(o.tpl(e.toJSON())),n.click(function(){return n.hasClass("checked")?(n.removeClass("checked"),i.splice(i.indexOf(e.id),1)):(n.addClass("checked"),i.push(e.id))}),t.append(n)}),
+            r.length>0?(n.html(this.tplMessage(e.toJSON())),s.click(function(){return o.sendInvites(e.id,i)}),s.show()):(n.html("No rooms available."),s.hide()),
+            this.show()
+        },
+        t.prototype.sendInvites=function(e,t){var n=this;return _.each(t,function(t){return n.model.sendRoomInvite({userId:e,roomId:t})}),this.sent()},
+        t.prototype.sent=function(){return this.$el.find(".message").text("Invite sent!"),this.$el.find("ul").empty(),this.$el.find(".invite, .cancel").hide(),this.$el.find(".invite").off()},
+        t.prototype.onShow=function(){return this.$el.removeClass("hidden"),this.$el.find(".modal").removeClass("hidden")},
+        t.prototype.onHide=function(){return this.$el.find(".modal").addClass("hidden")},
+        t
+    }(d.Modal),
     s=function(e){function t(){return this.toggle=m(this.toggle,this),this.launch=m(this.launch,this),t.__super__.constructor.apply(this,arguments)}return y(t,e),t.prototype.events={"click h4":"toggle","click .accept":"launch"},t.prototype.initialize=function(e){var t,n,r,i=this;return t=e.json,this.data=t,n=t.karma,r=n>1?"points":"point",t.enabled||(n="",r="soon",this.$el.addClass("disabled"),after(1,function(){return i.undelegateEvents()})),this.$el.find(".karma").text(""+n+" "+r)},t.prototype.render=function(e){return this.$el.find(".title").text(e.title),this.$el.find(".reward").text(e.points),this.$el.find(".message").html(e.message)},t.prototype.hide=function(){return this.$el.removeClass("active")},t.prototype.launch=function(){return this.trigger("launch",this),this.model.launchKarmaBoost({title:this.$el.find(".title").text(),points:this.$el.find(".reward").text(),description:this.$el.find(".message").text()})},t.prototype.toggle=function(){return this.$el.hasClass("active")?this.$el.removeClass("active"):this.$el.addClass("active")},t}(Backbone.View),
     o=function(e){function t(){return this.boostSolveMedia=m(this.boostSolveMedia,this),this.result=m(this.result,this),this.render=m(this.render,this),t.__super__.constructor.apply(this,arguments)}return y(t,e),t.prototype.events={"click .close":"hide"},t.prototype.initialize=function(){return this.dictionary={},this.tpl=_.template($("#tpl-karma-boost-item").html()),_.each(MakeChat.karmaBoost,this.render),this.model.on("boostSolveMedia",this.boostSolveMedia),this.model.on("karmaBoostResult",this.result),this.checkIfEmpty()},t.prototype.render=function(e){var t;return t=new s({el:$(this.tpl(e)),model:this.model,json:e}),e.type!=null&&(this.dictionary[e.type]=t),t.on("launch",this.hide),this.$el.find(".rewards").append(t.el)},t.prototype.result=function(e){return this.show()},t.prototype.boostSolveMedia=function(e){var t,n,r,i;return i=this.dictionary.solvemedia_quiz,i==null&&(r="solvemedia_quiz",n=function(){var e,n,i,s;i=MakeChat.karmaBoost,s=[];for(e=0,n=i.length;e<n;e++)t=i[e],t.type===r&&s.push(t);return s}(),this.render(n[0]),i=this.dictionary.solvemedia_quiz),i.render(e),e.state==="disabled"&&i.remove(),this.checkIfEmpty()},t.prototype.checkIfEmpty=function(){return this.$el.find(".rewards").children().length>0?this.$el.find(".instructions").text("Complete the tasks below for instant karma boost."):this.$el.find(".instructions").text("Check again later for karma boost options.")},t.prototype.onShow=function(){return this.$el.removeClass("hidden")},t.prototype.onHide=function(){return this.$el.addClass("hidden")},t}(d.Modal),
     e=function(e){function t(){return this.confirm=m(this.confirm,this),t.__super__.constructor.apply(this,arguments)}return y(t,e),t.prototype.events={"click .cancel":"hide"},t.prototype.initialize=function(){return this.model.on("confirm",this.confirm)},t.prototype.confirm=function(e){var t,n,r=this;return t=e.callback,n=e.message,this.$el.find(".confirm").off().click(function(){return r.hide(),t()}),this.$el.find(".message").text(n),this.show()},t.prototype.onShow=function(){return this.$el.removeClass("hidden")},t.prototype.onHide=function(){return this.$el.addClass("hidden")},t}(d.Modal),
@@ -1651,7 +1687,7 @@ function enhancinate() {
           return t="",
             n=[],
             _.each(e,function(e,r){
-              if(l.hide_enter&&e.type.search(/^(enter|leave)/)>=0)return t; //C
+              if(l.hide_enter&&e.type.search(/^(enter|leave)/)>=0)return t; //1.0 - hide enter/leave
               var s;
               return s="backlog-"+(new Date).getTime()+"-"+r,n.push(s),e.time=_.timeToHHMMSS(e.time*1e3),t+=i.tpl(e).replace("<li>","<li id='"+s+"' class='"+e.type+"'>")
             }),
