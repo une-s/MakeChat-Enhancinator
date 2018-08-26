@@ -20,3 +20,4 @@ The script has so far been tested in FireFox and Chrome.
 - Added sound notification setting: "Someone sends a private msg"
 - Corrected the message when unable to send declares: Win raffle, not earn more karma
 - Added support for multiple of the same (basic) emoticons
+- Invite button is now showing in the private messages area
