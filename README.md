@@ -1,8 +1,8 @@
 # MakeChat Enhancinator
 
-A userscript to make Zobe.com better, as the website's development has been discontinued.
+A userscript to make TeenChat.com and Zobe.com better, as the websites' development has been discontinued.
 
-The script has so far been tested in FireFox and Chrome.
+The script should work in all modern browsers. It has so far been tested in FireFox and Chrome.
 
 # How to Get
 
