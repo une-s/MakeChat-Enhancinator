@@ -2,7 +2,7 @@
 
 A userscript to make TeenChat.com and Zobe.com better, as the websites' development has been discontinued.
 
-The script should work in all modern browsers. It has so far been tested in FireFox and Chrome.
+The script has so far been tested in FireFox and Chrome, but should work in other browsers as well.
 
 # How to Get
 
