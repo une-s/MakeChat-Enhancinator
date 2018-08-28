@@ -34,7 +34,7 @@
     var room = Models.Room.prototype;
     var privateChat = Models.PrivateChat.prototype;
     var Enhancinator = this.Enhancinator = {
-        version: version;
+        version: version
     };
     var _debug = Enhancinator.debug = (function() {
         var states = {};
