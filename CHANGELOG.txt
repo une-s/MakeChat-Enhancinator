@@ -1,3 +1,8 @@
+1.7.2018.08
+- Complete rewrite: Adding on top of default script instead of blocking it. Much shorter code
+- Added suport for TeenChat.com
+- Should work in all modern browsers
+
 1.6.2018.08
 - Unhide invite button
 
