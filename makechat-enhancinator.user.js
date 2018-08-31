@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MakeChat Enhancinator
 // @version      1.8.2018.08
-// @description  Enhancement script for Zobe and potentially TeenChat in the future.
+// @description  Enhancement script for Zobe.com and TeenChat.com.
 // @downloadURL  https://raw.github.com/une-s/MakeChat-Enhancinator/master/makechat-enhancinator.user.js
 // @author       Une S
 // @match        http://zobe.com/*
