@@ -393,7 +393,7 @@
             return match[1];
         }
     }
-    // System respones to custom commands (not yet implemented)
+    // Custom system respones to custom commands (not yet implemented)
     function commandResponse(obj) {
         return obj;
     }
