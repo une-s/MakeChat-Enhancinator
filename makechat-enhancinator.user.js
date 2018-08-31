@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MakeChat Enhancinator
-// @version      1.7.2018.08
+// @version      1.8.2018.08
 // @description  Enhancement script for Zobe and potentially TeenChat in the future.
 // @downloadURL  https://raw.github.com/une-s/MakeChat-Enhancinator/master/makechat-enhancinator.user.js
 // @author       Une S
@@ -18,13 +18,14 @@
 (function() {
     'use strict';
 
-    var version = "1.7.2018.08";
+    var version = "1.8.2018.08";
 
     if(!this.MakeChat) {
         return;
     }
     var site = this.location.href.match(/^https?:\/\/(www\.)?([a-z]+)\./)[2];
     var $ = this.jQuery;
+    var $elems = {};
     var Emotes = this.Emotes;
     var MakeChat = this.MakeChat;
     var Sounds = MakeChat.Sounds;
@@ -32,9 +33,10 @@
     var settings = MakeChat.settings;
     var socket = Models.Socket.prototype;
     var room = Models.Room.prototype;
+    var rooms = {};
     var privateChat = Models.PrivateChat.prototype;
     var Enhancinator = this.Enhancinator = {
-        version: version;
+        version: version
     };
     var _debug = Enhancinator.debug = (function() {
         var states = {};
@@ -72,6 +74,9 @@
         var style = {
             '#help span.emotes': {
                 'width': '60px'
+            },
+            'body.cosmos p': {
+                'color': 'white'
             }
         };
 
@@ -93,7 +98,7 @@
     })(); //End styles
 
     // Edit help
-    (function() {
+    $(function() {
         var help = document.querySelector("#help .content");
         // If default help has been loaded already, edit right away
         if(help.children.length >= 8) {
@@ -108,7 +113,7 @@
             }
         });
         mo.observe(help, {childList: true});
-    })();
+    });
 
     // Edit settings
     $(function() {
@@ -193,11 +198,15 @@
             switch(cmd) {
             case "post":
                 obj = editSendMessage(obj, "Post");
+                if(obj.Post.match(/^\/(?!msg\b)/i)) {
+                    obj = roomCommands.call(this, obj);
+                }
                 break;
             case "im_post":
                 obj = editSendMessage(obj, "Message");
                 break;
             }
+            cmd = obj && obj.C || cmd;
             if(obj) {
                 return send.call(this, cmd, obj);
             }
@@ -250,10 +259,14 @@
             }
         };
     })();
+
     // Edit/block posted room messages
     room.post = (function() {
         var post = room.post;
         return function(obj) {
+            if(!rooms[this.id]) {
+                rooms[this.id] = this;
+            }
             // Hide enter/leave messages if setting is turned on
             if(settings.hide_enter && obj.type && obj.type.search(/^(enter|leave)$/) >= 0) {
                 return;
@@ -307,14 +320,63 @@
 
     // Functions
 
+    // Edit outgoing messages
     function editSendMessage(obj, msgKey) {
-        // Convert :feelsbadman: to :sadfrog: in outgoing messages
-        obj[msgKey] = obj[msgKey].replace(/:feelsbadman:/g, ":sadfrog:");
+        var msg = obj[msgKey];
+        // Remove redundant whitespaces
+        msg = msg.trim().replace(/\s+/g, ' ');
+        // Convert :feelsbadman: to :sadfrog:
+        msg = msg.replace(/:feelsbadman:/g, ":sadfrog:");
+        obj[msgKey] = msg;
         return obj;
     }
-    // System respones to custom commands (not yet implemented)
+    function roomCommands(obj) {
+        var post = obj.Post;
+        var room = rooms[obj.RoomID];
+        var match = post.match(/^\/(\S+)(?:\s(.+))?$/);
+        var cmd = match[1].toLowerCase();
+        var arg = match[2];
+        var socket = this;
+        var user, confirmMsg;
+        switch(cmd) {
+        case "kick":
+            if(arg = tagToUid(arg)) {
+                obj = {C:"kick_user", RoomID:room.id, UserID:arg, Reason:"kicked", Message:"You have been kicked from the room"};
+            }
+            break;
+        case "assign_mod":
+            if(arg = tagToUid(arg)) {
+                user = room.users.get(arg);
+                confirmMsg = "Do you want to promote "+user.get("name")+" to moderator of this room?";
+                confirm(confirmMsg, function(){
+                    socket.send("assign_moderator", {RoomID:room.id, UserID:user.id});
+                });
+                return;
+            }
+            break;
+        }
+        return obj;
+    }
+    function tagToUid(tag) {
+        var match = tag.match(/^@\[([0-9A-Za-z]+)\|[^\]]*\]$/);
+        if(match) {
+            return match[1];
+        }
+    }
+    // Custom system respones to custom commands (not yet implemented)
     function commandResponse(obj) {
         return obj;
+    }
+    // Display confirm popup
+    function confirm(msg, callback) {
+        var $el = $elems.confirm || ($elems.confirm = $('#confirm-modal'));
+        var $btn = $el.find('.confirm');
+        $btn.off().click(function() {
+            $el.addClass('hidden');
+            callback();
+        });
+        $el.find('.message').text(msg);
+        $el.removeClass('hidden');
     }
     function editHelp(help) {
 
