@@ -21,3 +21,5 @@ The script has so far been tested in FireFox and Chrome, but should work in othe
 - Corrected the message when unable to send declares: Win raffle, not earn more karma
 - Added support for multiple of the same (basic) emoticons
 - Invite button is now showing in the private messages area
+- Added moderator command for custom rooms: /kick @user
+- Added moderator command for custom rooms: /assign_mod @user
