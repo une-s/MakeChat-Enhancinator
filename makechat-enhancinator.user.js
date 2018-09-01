@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MakeChat Enhancinator
-// @version      1.9.2018.08
+// @version      1.10.2018.09
 // @description  Enhancement script for Zobe.com and TeenChat.com.
 // @downloadURL  https://raw.github.com/une-s/MakeChat-Enhancinator/master/makechat-enhancinator.user.js
 // @author       Une S
@@ -18,7 +18,7 @@
 (function() {
     'use strict';
 
-    var version = "1.9.2018.08";
+    var version = "1.10.2018.09";
 
     if(!this.MakeChat) {
         return;
@@ -150,7 +150,7 @@
                 'sfx all':     ['Mute all sounds'            , false]
             },
             'Misc Settings': site === "zobe" && {
-                'theme':       ['Dark Theme'                 , true ]
+                'clr-theme':   ['Dark Theme'                 , false, function(toggle) { document.body.className = toggle ? "cosmos" : ""; }]
             }
         });
         function createSettings(settings) {
@@ -203,6 +203,7 @@
             setting.addEventListener('click', function(evt) {
                 callback(checkbox.checked = !checkbox.checked);
             });
+            callback(checkbox.checked);
         }
     });
     // Edit outgoing data
@@ -239,12 +240,19 @@
     socket.publish = (function() {
         var publish = socket.publish;
         return function(cmd, obj) {
-            var i;
+            var i, $settings, $theme;
             // Log debug output to console if turned on
             if(_debug.get('in', cmd)) {
                 console.log('in -> ' + cmd + ' ' + JSON.stringify(obj));
             }
             switch(cmd) {
+            case "set_theme":
+                $settings = $elems.settings || ($elems.settings = $('#settings'));
+                $theme = $settings.find('.clr-theme');
+                if($theme.find('input[type="checkbox"]')[0].checked != (obj.Theme == "dark")) {
+                    $theme.click();
+                }
+                return;
             case "system_post":
                 // Edit system responses to custom commands
                 if(obj.Message === "Invalid Command") {
