@@ -34,13 +34,14 @@
     var socket = Models.Socket.prototype;
     var room = Models.Room.prototype;
     var rooms = {};
+    var ignored = {};
     var privateChat = Models.PrivateChat.prototype;
     var Enhancinator = this.Enhancinator = {
         version: version
     };
     // Count recent room invites to prevent spam
     var recentInvites = (function(){
-        var timer = 100;
+        var timer = 30;
         var from = {};
         return {
             add: function(userId) {
@@ -221,6 +222,12 @@
             case "im_post":
                 obj = editSendMessage(obj, "Message");
                 break;
+            case "ignore":
+                ignored[obj.UID] = true;
+                break;
+            case "unignore":
+                delete ignored[obj.UID];
+                break;
             }
             cmd = obj && obj.C || cmd;
             if(obj) {
@@ -348,8 +355,14 @@
         // Prevent flooding with room invites
         if(msg.search(" has invited you to a room: ") >= 0) {
             var uid = msg.match(/^@\[([0-9A-Za-z]+)\|/)[1];
+            if(ignored[uid]) {
+                return;
+            }
             var count = recentInvites.add(uid);
             if(count > 1) {
+                if(count > 10) {
+                    this.send("ignore", {UID: uid});
+                }
                 return;
             }
         }
