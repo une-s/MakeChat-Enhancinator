@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MakeChat Enhancinator
-// @version      1.8.2018.08
+// @version      1.9.2018.08
 // @description  Enhancement script for Zobe.com and TeenChat.com.
 // @downloadURL  https://raw.github.com/une-s/MakeChat-Enhancinator/master/makechat-enhancinator.user.js
 // @author       Une S
@@ -18,7 +18,7 @@
 (function() {
     'use strict';
 
-    var version = "1.8.2018.08";
+    var version = "1.9.2018.08";
 
     if(!this.MakeChat) {
         return;
@@ -34,10 +34,27 @@
     var socket = Models.Socket.prototype;
     var room = Models.Room.prototype;
     var rooms = {};
+    var ignored = {};
     var privateChat = Models.PrivateChat.prototype;
     var Enhancinator = this.Enhancinator = {
         version: version
     };
+    // Count recent room invites to prevent spam
+    var recentInvites = (function(){
+        var timer = 30;
+        var from = {};
+        return {
+            add: function(userId) {
+                if(!from[userId]) {
+                    from[userId] = 0;
+                    setTimeout(function(){
+                        delete from[userId];
+                    }, timer*1000);
+                }
+                return ++from[userId];
+            }
+        };
+    })();
     var _debug = Enhancinator.debug = (function() {
         var states = {};
         var def = 'default';
@@ -205,6 +222,12 @@
             case "im_post":
                 obj = editSendMessage(obj, "Message");
                 break;
+            case "ignore":
+                ignored[obj.UID] = true;
+                break;
+            case "unignore":
+                delete ignored[obj.UID];
+                break;
             }
             cmd = obj && obj.C || cmd;
             if(obj) {
@@ -232,10 +255,7 @@
                 obj.Message = obj.Message.replace("Earm more karma to send declare messages.", "Win the karma raffle to send a declare message.");
                 break;
             case "growl":
-                // Correct mistakes in growl messages
-                obj.Message = obj.Message.replace('You can use this boost again in 6 hours', function(match) {
-                    return match.replace('6', '4');
-                });
+                obj = editGrowl(obj);
                 break;
             case "im_message":
                 // Play sound upon receiving private messages if setting is turned on
@@ -328,6 +348,29 @@
         // Convert :feelsbadman: to :sadfrog:
         msg = msg.replace(/:feelsbadman:/g, ":sadfrog:");
         obj[msgKey] = msg;
+        return obj;
+    }
+    function editGrowl(obj) {
+        var msg = obj.Message;
+        // Prevent flooding with room invites
+        if(msg.search(" has invited you to a room: ") >= 0) {
+            var uid = msg.match(/^@\[([0-9A-Za-z]+)\|/)[1];
+            if(ignored[uid]) {
+                return;
+            }
+            var count = recentInvites.add(uid);
+            if(count > 1) {
+                if(count > 10) {
+                    this.send("ignore", {UID: uid});
+                }
+                return;
+            }
+        }
+        // Correct mistakes in growl messages
+        msg = msg.replace('You can use this boost again in 6 hours', function(match) {
+            return match.replace('6', '4');
+        });
+        obj.Message = msg;
         return obj;
     }
     function roomCommands(obj) {
