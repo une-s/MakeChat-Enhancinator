@@ -85,6 +85,7 @@
         };
     })();
 
+    // Add class "zobe" or "teenchat" to body
     ($elems.body = $elems.body || $('body').first()).addClass(site);
 
     // Additional styling
