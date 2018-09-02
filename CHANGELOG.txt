@@ -1,3 +1,7 @@
+1.11.2018.09
+- Added "Create Room" button on TeenChat
+- Styled confirm dialog (E.g. confirm assign_mod)
+
 1.10.2018.09
 - Fix dark theme issue for some users
 
