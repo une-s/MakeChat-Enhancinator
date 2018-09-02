@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MakeChat Enhancinator
-// @version      1.10.2018.09
+// @version      1.11.2018.09
 // @description  Enhancement script for Zobe.com and TeenChat.com.
 // @downloadURL  https://raw.github.com/une-s/MakeChat-Enhancinator/master/makechat-enhancinator.user.js
 // @author       Une S
@@ -18,7 +18,7 @@
 (function() {
     'use strict';
 
-    var version = "1.10.2018.09";
+    var version = "1.11.2018.09";
 
     if(!this.MakeChat) {
         return;
@@ -85,6 +85,8 @@
         };
     })();
 
+    ($elems.body = $elems.body || $('body').first()).addClass(site);
+
     // Additional styling
     (function() {
         // Define style object
@@ -92,8 +94,26 @@
             '#help span.emotes': {
                 'width': '60px'
             },
-            'body.cosmos p': {
+            'body.zobe.cosmos p': {
                 'color': 'white'
+            },
+            'body.teenchat .create.button': {
+                'display': 'inline-block',
+                'background-color': '#4a5dbb',
+                'padding': '5px 15px',
+                'color': '#fff',
+                'text-transform': 'uppercase',
+                'position': 'relative',
+                'left': '20px'
+            },
+            'body.teenchat #confirm-modal .confirm.button': {
+                'color': 'rgba(0,0,200,0.5)'
+            },
+            'body.zobe #confirm-modal': {
+                'background': '#f3f6f9'
+            },
+            'body.zobe.cosmos #confirm-modal': {
+                'background': '#314041'
             }
         };
 
@@ -150,7 +170,7 @@
                 'sfx all':     ['Mute all sounds'            , false]
             },
             'Misc Settings': site === "zobe" && {
-                'clr-theme':   ['Dark Theme'                 , false, function(toggle) { document.body.className = toggle ? "cosmos" : ""; }]
+                'clr-theme':   ['Dark Theme'                 , false, function(toggle) { $elems.body[(toggle ? "add" : "remove") + "Class"]("cosmos"); }]
             }
         });
         function createSettings(settings) {
@@ -317,6 +337,10 @@
             focus.apply(this, arguments);
         };
     })();
+
+    if(site == "teenchat") {
+        $('#header > .logo').after("<div class='create button'>Create Room</div>");
+    }
 
     // Emoji stuff
 
