@@ -23,3 +23,5 @@ The script has so far been tested in FireFox and Chrome, but should work in othe
 - Invite button is now showing in the private messages area
 - Added moderator command for custom rooms: /kick @user
 - Added moderator command for custom rooms: /assign_mod @user
+- Prevent room invite flooding
+- Added "Create Room" button on TeenChat
