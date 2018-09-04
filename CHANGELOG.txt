@@ -1,3 +1,6 @@
+1.12.2018.09
+- Have emoji fixes take effect on TeenChat too
+
 1.11.2018.09
 - Added "Create Room" button on TeenChat
 - Styled confirm dialog (E.g. confirm assign_mod)
