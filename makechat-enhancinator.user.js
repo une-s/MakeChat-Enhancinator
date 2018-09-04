@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MakeChat Enhancinator
-// @version      1.13.2018.09
+// @version      1.14.2018.09
 // @description  Enhancement script for Zobe.com and TeenChat.com.
 // @downloadURL  https://raw.github.com/une-s/MakeChat-Enhancinator/master/makechat-enhancinator.user.js
 // @author       Une S
@@ -18,7 +18,7 @@
 (function() {
     'use strict';
 
-    var version = "1.13.2018.09";
+    var version = "1.14.2018.09";
 
     if(!this.MakeChat) {
         return;
@@ -44,7 +44,7 @@
     // Count recent room invites to prevent spam
     var recentInvites = getCounter(30); // Reset after 30 secs
     // Count recent enters/leaves to prevent spam
-    var recentEnters = getCounter(3);
+    var recentEnters = getCounter(2);
     var _debug = Enhancinator.debug = (function() {
         var states = {};
         var def = 'default';
@@ -286,9 +286,9 @@
                 break;
             case "backlog":
                 // Hide enter/leave messages from backlog if setting is turned on
-                if(settings.hide_enter) {
-                    for(i = obj.Events.length - 1; i >= 0; i--) {
-                        if(obj.Events[i].C.search(/^(add|remove)user$/) >= 0) {
+                for(i = obj.Events.length - 1; i >= 0; i--) {
+                    if(obj.Events[i].C.search(/^(add|remove)user$/) >= 0) {
+                        if(settings.hide_enter || ignored[obj.Events[i].UID]) {
                             obj.Events.splice(i, 1);
                         }
                     }
@@ -310,7 +310,7 @@
             }
             var userId = obj.id;
             var user = userId && this.users.get(userId);
-            var maxEnterLeaves = 5;
+            var maxEnterLeaves = 4;
             var count, mod;
             if(user && user.get("self")) {
                 self = user;
@@ -328,9 +328,7 @@
                     // Auto-ignore
                     !ignored[userId] && socket.send("ignore", {UID: userId});
                     // Auto-kick if you're a mod
-                    if(mod && count == maxEnterLeaves + 1) {
-                        socket.send("kick_user", {RoomID:this.id, UserID:userId, Reason:"kicked", Message:"You have been kicked from the room"});
-                    }
+                    mod && socket.send("kick_user", {RoomID:this.id, UserID:userId, Reason:"kicked", Message:"You have been kicked from the room"});
                     return;
                 }
                 // Hide enter/leave messages if setting is turned on, or if ignored
