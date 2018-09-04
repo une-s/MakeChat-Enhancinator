@@ -1,3 +1,7 @@
+1.14.2018.09
+- Hides enter/leaves by ignored users in the backlog too
+- Fixed auto-kick enter/leave flooders
+
 1.13.2018.09
 - Hides enter/leave & name change messages for ignored users
 - Added auto-ignore on enter/leave flooding
