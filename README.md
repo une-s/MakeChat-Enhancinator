@@ -20,7 +20,7 @@ The script has so far been tested in FireFox and Chrome, but should work in othe
 - Added moderator command for custom rooms: /kick @user
 - Added moderator command for custom rooms: /assign_mod @user
 - Added "Create Room" button on TeenChat
-- Added "Invite" button on Zobe (private messages tab)
+- Added "Invite" button on Zobe (in the private messages tab)
 - Added sound notification setting: "Someone sends a private msg"
 - The help section now displays all emoticons (basic & memes)
 - The :feelsbadman: command now correctly displays the :sadfrog: emoticon.
