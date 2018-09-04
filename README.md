@@ -11,17 +11,21 @@ The script has so far been tested in FireFox and Chrome, but should work in othe
 
 # Features
 
-- The :feelsbadman: command now correctly displays the :sadfrog: emoticon.
-- The help section has been updated to properly display the angel emoticon & command
-- The meme emoticons have been added to the help section
-- Added setting: "Hide enter/leave messages"
-- Added setting: "Hide name change messages"
-- Corrected the message on karma boost completion: Next available in 4 hours, not 6 hours
-- Added sound notification setting: "Someone sends a private msg"
-- Corrected the message when unable to send declares: Win raffle, not earn more karma
-- Added support for multiple of the same (basic) emoticons
-- Invite button is now showing in the private messages area
+- Auto-ignore enter/leave flooders
+- Auto-ignore room invite flooders
+- Auto-kick enter/leave flooders (room mods only)
+- Hide enter/leave messages by ignored users
+- Hide name change messages by ignored users
+- Hide room invites by ignored users
 - Added moderator command for custom rooms: /kick @user
 - Added moderator command for custom rooms: /assign_mod @user
-- Prevent room invite flooding
 - Added "Create Room" button on TeenChat
+- Added "Invite" button on Zobe (private messages tab)
+- Added sound notification setting: "Someone sends a private msg"
+- The help section now displays all emoticons (basic & memes)
+- The :feelsbadman: command now correctly displays the :sadfrog: emoticon.
+- Now displays multiple of the same (basic) emoticon, not just the first
+- Corrected the message on karma boost completion: Next available in 4 hours, not 6 hours
+- Corrected the message when unable to send declares: Win raffle, not earn more karma
+- Added setting: "Hide enter/leave messages" (May remove in the future, due to new auto-hide functionality)
+- Added setting: "Hide name change messages" (May remove in the future, due to new auto-hide functionality)

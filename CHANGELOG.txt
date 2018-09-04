@@ -1,3 +1,9 @@
+1.13.2018.09
+- Hides enter/leave & name change messages for ignored users
+- Added auto-ignore on enter/leave flooding
+- Added auto-kick on enter/leave flooding (if room mod)
+- Fixed auto-ignore on room invite flooding
+
 1.12.2018.09
 - Have emoji fixes take effect on TeenChat too
 
