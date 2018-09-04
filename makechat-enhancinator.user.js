@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MakeChat Enhancinator
-// @version      1.11.2018.09
+// @version      1.12.2018.09
 // @description  Enhancement script for Zobe.com and TeenChat.com.
 // @downloadURL  https://raw.github.com/une-s/MakeChat-Enhancinator/master/makechat-enhancinator.user.js
 // @author       Une S
@@ -18,7 +18,7 @@
 (function() {
     'use strict';
 
-    var version = "1.11.2018.09";
+    var version = "1.12.2018.09";
 
     if(!this.MakeChat) {
         return;
@@ -370,6 +370,10 @@
     Emotes.addMeme(":lol:", ":LOL:");
     Emotes.addMeme("T_T");
     Emotes.addMeme(":pokerface:", ":poker:");
+    // Fix emoji changes not taking effect on TeenChat
+    MakeChat.convertPost = function(msg) {
+        return Emotes.emotifyPost(Emotes.emotifyBasic(msg));
+    };
 
     // Functions
 
