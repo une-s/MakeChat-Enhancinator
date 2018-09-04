@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MakeChat Enhancinator
-// @version      1.12.2018.09
+// @version      1.13.2018.09
 // @description  Enhancement script for Zobe.com and TeenChat.com.
 // @downloadURL  https://raw.github.com/une-s/MakeChat-Enhancinator/master/makechat-enhancinator.user.js
 // @author       Une S
@@ -18,7 +18,7 @@
 (function() {
     'use strict';
 
-    var version = "1.12.2018.09";
+    var version = "1.13.2018.09";
 
     if(!this.MakeChat) {
         return;
@@ -31,30 +31,20 @@
     var Sounds = MakeChat.Sounds;
     var Models = MakeChat.Models;
     var settings = MakeChat.settings;
-    var socket = Models.Socket.prototype;
+    var _socket = Models.Socket.prototype; // Prototype object
+    var socket; // Actual object
     var room = Models.Room.prototype;
     var rooms = {};
+    var self;
     var ignored = {};
     var privateChat = Models.PrivateChat.prototype;
     var Enhancinator = this.Enhancinator = {
         version: version
     };
     // Count recent room invites to prevent spam
-    var recentInvites = (function(){
-        var timer = 30;
-        var from = {};
-        return {
-            add: function(userId) {
-                if(!from[userId]) {
-                    from[userId] = 0;
-                    setTimeout(function(){
-                        delete from[userId];
-                    }, timer*1000);
-                }
-                return ++from[userId];
-            }
-        };
-    })();
+    var recentInvites = getCounter(30); // Reset after 30 secs
+    // Count recent enters/leaves to prevent spam
+    var recentEnters = getCounter(3);
     var _debug = Enhancinator.debug = (function() {
         var states = {};
         var def = 'default';
@@ -228,9 +218,10 @@
         }
     });
     // Edit outgoing data
-    socket.send = (function() {
-        var send = socket.send;
+    _socket.send = (function() {
+        var send = _socket.send;
         return function(cmd, obj) {
+            socket = socket || this;
             if(_debug.get('out', cmd)) {
                 console.log('out -> ' + cmd + ' ' + JSON.stringify(obj));
             }
@@ -258,10 +249,11 @@
         };
     })();
     // edit handling of incoming data
-    socket.publish = (function() {
-        var publish = socket.publish;
+    _socket.publish = (function() {
+        var publish = _socket.publish;
         return function(cmd, obj) {
             var i, $settings, $theme;
+            socket = socket || this;
             // Log debug output to console if turned on
             if(_debug.get('in', cmd)) {
                 console.log('in -> ' + cmd + ' ' + JSON.stringify(obj));
@@ -316,13 +308,42 @@
             if(!rooms[this.id]) {
                 rooms[this.id] = this;
             }
-            // Hide enter/leave messages if setting is turned on
-            if(settings.hide_enter && obj.type && obj.type.search(/^(enter|leave)$/) >= 0) {
-                return;
+            var userId = obj.id;
+            var user = userId && this.users.get(userId);
+            var maxEnterLeaves = 5;
+            var count, mod;
+            if(user && user.get("self")) {
+                self = user;
             }
-            // Hide name change messages if setting is turned on
-            if(settings.hide_rename && obj.type == "system" && obj.post.search(" is now " + obj.name) >= 0) {
-                return;
+            // If enter/leave message
+            if(obj.type && obj.type.search(/^(enter|leave)$/) >= 0) {
+                mod = getSelf(this.users).get("mod");
+                // Hide ignored users right away, unless you're a mod
+                if(!mod && ignored[userId]) {
+                    return;
+                }
+                count = recentEnters.add(userId, this.id);
+                // If enter/leave flodding
+                if(count > maxEnterLeaves) {
+                    // Auto-ignore
+                    !ignored[userId] && socket.send("ignore", {UID: userId});
+                    // Auto-kick if you're a mod
+                    if(mod && count == maxEnterLeaves + 1) {
+                        socket.send("kick_user", {RoomID:this.id, UserID:userId, Reason:"kicked", Message:"You have been kicked from the room"});
+                    }
+                    return;
+                }
+                // Hide enter/leave messages if setting is turned on, or if ignored
+                if(settings.hide_enter || ignored[userId]) {
+                    return;
+                }
+            }
+            // On name change messages
+            if(obj.type == "system" && obj.post.search(" is now " + obj.name) >= 0) {
+                // Hide if ignored or if setting is turned on
+                if(settings.hide_rename || ignored[userId]) {
+                    return;
+                }
             }
             return post.apply(this, arguments);
         }
@@ -377,6 +398,33 @@
 
     // Functions
 
+    function getCounter(resetTime){
+        var store = {};
+        return {
+            add: function(userId, roomId) {
+                var id = userId + (roomId || "");
+                if(!store[id]) {
+                    store[id] = 0;
+                    setTimeout(function(){
+                        delete store[id];
+                    }, resetTime*1000);
+                }
+                return ++store[id];
+            }
+        };
+    };
+    function getSelf(users) {
+        if(!self) {
+            for(var uid in users._byId) {
+                var user = users.get(uid);
+                if(user.get("self")) {
+                    self = user;
+                    break;
+                }
+            }
+        }
+        return self;
+    }
     // Edit outgoing messages
     function editSendMessage(obj, msgKey) {
         var msg = obj[msgKey];
@@ -398,7 +446,7 @@
             var count = recentInvites.add(uid);
             if(count > 1) {
                 if(count > 10) {
-                    this.send("ignore", {UID: uid});
+                    socket.send("ignore", {UID: uid});
                 }
                 return;
             }
@@ -416,7 +464,6 @@
         var match = post.match(/^\/(\S+)(?:\s(.+))?$/);
         var cmd = match[1].toLowerCase();
         var arg = match[2];
-        var socket = this;
         var user, confirmMsg;
         switch(cmd) {
         case "kick":
