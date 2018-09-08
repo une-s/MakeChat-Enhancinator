@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MakeChat Enhancinator
-// @version      1.14.2018.09
+// @version      1.15.2018.09
 // @description  Enhancement script for Zobe.com and TeenChat.com.
 // @downloadURL  https://raw.github.com/une-s/MakeChat-Enhancinator/master/makechat-enhancinator.user.js
 // @author       Une S
@@ -18,7 +18,7 @@
 (function() {
     'use strict';
 
-    var version = "1.14.2018.09";
+    var version = "1.15.2018.09";
 
     if(!this.MakeChat) {
         return;
@@ -311,7 +311,7 @@
             var userId = obj.id;
             var user = userId && this.users.get(userId);
             var maxEnterLeaves = 4;
-            var count, mod;
+            var recent, mod, $chatrooms;
             if(user && user.get("self")) {
                 self = user;
             }
@@ -322,19 +322,23 @@
                 if(!mod && ignored[userId]) {
                     return;
                 }
-                count = recentEnters.add(userId, this.id);
+                recent = recentEnters.add(userId, this.id);
                 // If enter/leave flodding
-                if(count > maxEnterLeaves) {
+                if(recent.count > maxEnterLeaves) {
                     // Auto-ignore
                     !ignored[userId] && socket.send("ignore", {UID: userId});
                     // Auto-kick if you're a mod
                     mod && socket.send("kick_user", {RoomID:this.id, UserID:userId, Reason:"kicked", Message:"You have been kicked from the room"});
+                    // Hide the previous enters/leaves that contributed to this flooding
+                    $chatrooms = $elems.chatrooms || ($elems.chatrooms = $('#publicChat > .chatrooms'));
+                    $chatrooms.children(".chatroom").children(".log-container").find(".entrleav-" + recent.group).remove();
                     return;
                 }
                 // Hide enter/leave messages if setting is turned on, or if ignored
                 if(settings.hide_enter || ignored[userId]) {
                     return;
                 }
+                obj.type += " entrleav-" + recent.group;
             }
             // On name change messages
             if(obj.type == "system" && obj.post.search(" is now " + obj.name) >= 0) {
@@ -398,17 +402,19 @@
 
     function getCounter(resetTime){
         var store = {};
+        var storeNo = 0;
         return {
             add: function(userId, roomId) {
                 var id = userId + (roomId || "");
                 if(!store[id]) {
-                    store[id] = 0;
+                    store[id] = {count: 0, group: ++storeNo};
                     setTimeout(function(){
                         delete store[id];
                     }, resetTime*1000);
                 }
-                return ++store[id];
-            }
+                store[id].count++;
+                return store[id];
+            },
         };
     };
     function getSelf(users) {
@@ -441,7 +447,7 @@
             if(ignored[uid]) {
                 return;
             }
-            var count = recentInvites.add(uid);
+            var count = recentInvites.add(uid).count;
             if(count > 1) {
                 if(count > 10) {
                     socket.send("ignore", {UID: uid});
