@@ -13,7 +13,6 @@ The script has so far been tested in FireFox and Chrome, but should work in othe
 
 - Auto-ignore enter/leave flooders
 - Auto-ignore room invite flooders
-- Auto-kick enter/leave flooders (room mods only)
 - Hide enter/leave messages by ignored users
 - Hide name change messages by ignored users
 - Hide room invites by ignored users
