@@ -1,5 +1,8 @@
+1.16.2018.09
+- More efficient solution to previous update
+
 1.15.2018.09
-- Hides enters/leaves that cintributed to flooding before auto-ignore
+- Hides enters/leaves that contributed to flooding before auto-ignore
 
 1.14.2018.09
 - Hides enter/leaves by ignored users in the backlog too
