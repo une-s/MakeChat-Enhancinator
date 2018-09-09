@@ -364,7 +364,7 @@
             var userId = obj.id;
             var user = userId && this.users.get(userId);
             var maxEnterLeaves = 4;
-            var recent, mod, $chatrooms;
+            var recent, mod;
             if(user && user.get("self")) {
                 self = user;
             }
