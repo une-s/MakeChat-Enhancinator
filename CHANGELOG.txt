@@ -1,3 +1,8 @@
+1.17.2018.09
+- Removed auto-kick enter/leave flooders (reason: bug + too many system messages)
+- Fixed enters/leaves not disappearing in all rooms
+- Show instructions when wrong /kick and /assign_mod syntax
+
 1.16.2018.09
 - Fix some text having turned white
 - More efficient solution to previous update
