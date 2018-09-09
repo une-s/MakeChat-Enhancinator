@@ -1,4 +1,5 @@
 1.16.2018.09
+- Fix some text having turned white
 - More efficient solution to previous update
 
 1.15.2018.09
