@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MakeChat Enhancinator
-// @version      1.15.2018.09
+// @version      1.16.2018.09
 // @description  Enhancement script for Zobe.com and TeenChat.com.
 // @downloadURL  https://raw.github.com/une-s/MakeChat-Enhancinator/master/makechat-enhancinator.user.js
 // @author       Une S
@@ -18,7 +18,7 @@
 (function() {
     'use strict';
 
-    var version = "1.15.2018.09";
+    var version = "1.16.2018.09";
 
     if(!this.MakeChat) {
         return;
@@ -45,6 +45,57 @@
     var recentInvites = getCounter(30); // Reset after 30 secs
     // Count recent enters/leaves to prevent spam
     var recentEnters = getCounter(2);
+    // Observe when new posts are added to a chat room (in the DOM tree) and perform pending tasks on them once they are added
+    // Only applies to tasks that can't be done until after the post has become an HTML element.
+    var observer = (function() {
+        var list = {};
+        var tasks = [];
+        return {
+            observe: function(roomId) {
+                if(list[roomId]) {
+                    return;
+                }
+                var $rooms = $elems.chatrooms || ($elems.chatrooms = $("#publicChat > .chatrooms"));
+                Array.prototype.forEach.call($rooms.children(".chatroom"), function(room) {
+                    if(!observing(room)) {
+                        observe(roomId, room);
+                    }
+                });
+            },
+            addTask: function(task) {
+                tasks.push(task);
+            }
+        };
+        function observing(room) {
+            for(var roomId in list) {
+                if(list.hasOwnProperty(roomId) && list[roomId][0] === room) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        function observe(roomId, room) {
+            var mo = new MutationObserver(callback);
+            var logs = $(room).children(".log-container").children(".room").children(".logs")[0];
+            mo.observe(logs, {childList: true, subtree: true});
+            list[roomId] = [room, mo];
+        }
+        function callback(mutations, mo) {
+            for(var mutation of mutations) {
+                var removed = mutation.removedNodes[0];
+                if(removed && removed.className == "content") {
+                    mo.disconnect();
+                }
+                var added = mutation.addedNodes[0];
+                if(added && added.tagName == "LI") {
+                    while(tasks.length) {
+                        var task = tasks.shift();
+                        task(added);
+                    }
+                }
+            }
+        }
+    })();
     var _debug = Enhancinator.debug = (function() {
         var states = {};
         var def = 'default';
@@ -85,9 +136,6 @@
             '#help span.emotes': {
                 'width': '60px'
             },
-            'body.zobe.cosmos p': {
-                'color': 'white'
-            },
             'body.teenchat .create.button': {
                 'display': 'inline-block',
                 'background-color': '#4a5dbb',
@@ -105,6 +153,9 @@
             },
             'body.zobe.cosmos #confirm-modal': {
                 'background': '#314041'
+            },
+            'body.zobe.cosmos #confirm-modal .message': {
+                'color': '#aac9cf'
             }
         };
 
@@ -285,6 +336,7 @@
                 }
                 break;
             case "backlog":
+                observer.observe(obj.RoomID);
                 // Hide enter/leave messages from backlog if setting is turned on
                 for(i = obj.Events.length - 1; i >= 0; i--) {
                     if(obj.Events[i].C.search(/^(add|remove)user$/) >= 0) {
@@ -307,11 +359,12 @@
         return function(obj) {
             if(!rooms[this.id]) {
                 rooms[this.id] = this;
+                observer.observe(this.id);
             }
             var userId = obj.id;
             var user = userId && this.users.get(userId);
             var maxEnterLeaves = 4;
-            var recent, mod, $chatrooms;
+            var recent, mod, $chatrooms, i;
             if(user && user.get("self")) {
                 self = user;
             }
@@ -329,16 +382,22 @@
                     !ignored[userId] && socket.send("ignore", {UID: userId});
                     // Auto-kick if you're a mod
                     mod && socket.send("kick_user", {RoomID:this.id, UserID:userId, Reason:"kicked", Message:"You have been kicked from the room"});
-                    // Hide the previous enters/leaves that contributed to this flooding
-                    $chatrooms = $elems.chatrooms || ($elems.chatrooms = $('#publicChat > .chatrooms'));
-                    $chatrooms.children(".chatroom").children(".log-container").find(".entrleav-" + recent.group).remove();
+                    // Remove the previous enters/leaves that contributed to this flooding
+                    while(recent.elems.length) {
+                        recent.elems.pop().remove();
+                    }
                     return;
                 }
                 // Hide enter/leave messages if setting is turned on, or if ignored
                 if(settings.hide_enter || ignored[userId]) {
                     return;
                 }
-                obj.type += " entrleav-" + recent.group;
+                // Store enter/leave element (max 2 seconds)
+                // These will be deleted from the DOM if they turn out to be spam/flooding
+                observer.addTask(function(elem) {
+                    recent.elems = recent.elems || [];
+                    recent.elems.push(elem);
+                });
             }
             // On name change messages
             if(obj.type == "system" && obj.post.search(" is now " + obj.name) >= 0) {
@@ -402,12 +461,11 @@
 
     function getCounter(resetTime){
         var store = {};
-        var storeNo = 0;
         return {
             add: function(userId, roomId) {
                 var id = userId + (roomId || "");
                 if(!store[id]) {
-                    store[id] = {count: 0, group: ++storeNo};
+                    store[id] = {count: 0};
                     setTimeout(function(){
                         delete store[id];
                     }, resetTime*1000);
