@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MakeChat Enhancinator
-// @version      1.16.2018.09
+// @version      1.17.2018.09
 // @description  Enhancement script for Zobe.com and TeenChat.com.
 // @downloadURL  https://raw.github.com/une-s/MakeChat-Enhancinator/master/makechat-enhancinator.user.js
 // @author       Une S
@@ -18,7 +18,7 @@
 (function() {
     'use strict';
 
-    var version = "1.16.2018.09";
+    var version = "1.17.2018.09";
 
     if(!this.MakeChat) {
         return;
@@ -318,9 +318,7 @@
                 }
                 return;
             case "system_post":
-                // Edit system responses to custom commands
                 if(obj.Message === "Invalid Command") {
-                    obj = commandResponse(obj);
                     break;
                 }
                 // Correct mistakes in system post messages
@@ -364,24 +362,17 @@
             var userId = obj.id;
             var user = userId && this.users.get(userId);
             var maxEnterLeaves = 4;
-            var recent, mod;
+            var recent;
             if(user && user.get("self")) {
                 self = user;
             }
             // If enter/leave message
             if(obj.type && obj.type.search(/^(enter|leave)$/) >= 0) {
-                mod = getSelf(this.users).get("mod");
-                // Hide ignored users right away, unless you're a mod
-                if(!mod && ignored[userId]) {
-                    return;
-                }
                 recent = recentEnters.add(userId, this.id);
                 // If enter/leave flodding
                 if(recent.count > maxEnterLeaves) {
                     // Auto-ignore
                     !ignored[userId] && socket.send("ignore", {UID: userId});
-                    // Auto-kick if you're a mod
-                    mod && socket.send("kick_user", {RoomID:this.id, UserID:userId, Reason:"kicked", Message:"You have been kicked from the room"});
                     // Remove the previous enters/leaves that contributed to this flooding
                     while(recent.elems.length) {
                         recent.elems.pop().remove();
@@ -393,7 +384,7 @@
                     return;
                 }
                 // Store enter/leave element (max 2 seconds)
-                // These will be deleted from the DOM if they turn out to be spam/flooding
+                // These will be deleted from the DOM later if they turn out to be spam/flooding
                 observer.addTask(function(elem) {
                     recent.elems = recent.elems || [];
                     recent.elems.push(elem);
@@ -531,6 +522,9 @@
         case "kick":
             if(arg = tagToUid(arg)) {
                 obj = {C:"kick_user", RoomID:room.id, UserID:arg, Reason:"kicked", Message:"You have been kicked from the room"};
+            } else {
+                systemMessage("To kick, type /kick &lt;username&gt;", room.id);
+                return;
             }
             break;
         case "assign_mod":
@@ -540,21 +534,18 @@
                 confirm(confirmMsg, function(){
                     socket.send("assign_moderator", {RoomID:room.id, UserID:user.id});
                 });
-                return;
+            } else {
+                systemMessage("To assign as room moderator, type /assign_mod &lt;username&gt;", room.id);
             }
-            break;
+            return;
         }
         return obj;
     }
     function tagToUid(tag) {
-        var match = tag.match(/^@\[([0-9A-Za-z]+)\|[^\]]*\]$/);
+        var match = tag && tag.match(/^@\[([0-9A-Za-z]+)\|[^\]]*\]$/);
         if(match) {
             return match[1];
         }
-    }
-    // Custom system respones to custom commands (not yet implemented)
-    function commandResponse(obj) {
-        return obj;
     }
     // Display confirm popup
     function confirm(msg, callback) {
@@ -566,6 +557,9 @@
         });
         $el.find('.message').text(msg);
         $el.removeClass('hidden');
+    }
+    function systemMessage(msg, roomId) {
+        socket.publish("system_post", {Time: Date.now(), RoomID: roomId, Message: msg});
     }
     function editHelp(help) {
 
